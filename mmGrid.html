@@ -1,19 +1,48 @@
 
-<div class="ui-grid-header-columns" ms-css-height="headerHeight">
-    <div ms-repeat="columns" class="ui-grid-header-column ui-state-default" ms-css-width="el.width" ms-class="el.className" ms-visible="el.toggle">{{el.text}}</div>
+<div class="ui-grid-thead" ms-css-height="headerHeight">
+    <div ms-repeat="columns" class="ui-grid-col ui-state-default" ms-css-width="el.width" ms-class="el.className" ms-visible="el.toggle">{{el.text}}</div>
 </div>
 <div class="ui-grid-viewport" style="width: 100%; overflow: auto; outline: 0px; 
      position: relative;" ms-on-scroll="sss" ms-css-height="viewportHeight">
-    <div ms-each-row="rows" class="ui-grid-canvas "ms-css-height="realHeight" >
-        <div class="ui-grid-row ui-widget-content" 
+    <div ms-each-row="rows" class="ui-grid-tbody "ms-css-height="realHeight" >
+        <div class="ui-grid-tr ui-widget-content" 
              ms-hover="row-hover"
              ms-css-top="srollTop + $index * 25"
              ms-class="even: (min + $index) % 2 === 0"  
              ms-class-1="odd: (min + $index) % 2 !== 0" 
              ms-visible="min+$index < total"
-             ms-with="row" data-with-sorted="order"
+             ms-css-height="rowHeight"
+             ms-with="row" data-with-sorted="order"  
              >
-            <span  ms-css-width="getCellWidth($key)" style="display: inline-block" >{{$val}}</span>
+            <span  ms-css-width="getCellWidth($key)" class="ui-grid-td" >{{$val}}</span>
         </div>
     </div>
 </div>
+<style>
+    .ui-grid-thead{
+        position: relative;
+        white-space: nowrap;
+        cursor: default;
+        overflow: hidden;
+    }
+    .ui-grid-col{
+        position: relative;
+        display: inline-block;
+        overflow: hidden;
+        float: left;
+    }
+    .ui-grid-tbody {
+        position: relative;
+        outline: 0;
+    }
+    .ui-grid-tr{
+        position: relative;
+        overflow: hidden;
+    }
+    .ui-grid-td{
+        border: 1px solid #eee;
+        display: inline-block;
+        float: left;
+        height: 100%;
+    }
+</style>
