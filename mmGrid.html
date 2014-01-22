@@ -1,10 +1,18 @@
 
-<div class="ui-grid-thead" ms-css-height="headerHeight" ms-mousedown="theadDown" ms-mousemove="theadMove" ms-mouseup="theadUp">
-    <div ms-repeat="columns" ms-css-height="headerHeight" class="ui-grid-col ui-state-default" ms-css-width="el.width" ms-class="el.className" ms-visible="el.toggle">
+<div class="ui-grid-thead" ms-css-height="headerHeight" 
+     ms-mousedown="theadDown"  ms-click="theadChick">
+    <div class="ui-grid-col"
+         ms-repeat="columns"
+         ms-css-height="headerHeight"  
+         ms-css-width="el.width" 
+         ms-class="el.className" 
+         ms-visible="el.toggle" 
+         ms-data-vm="el">
         {{el.text}}
-        <div class="ui-helper-resizer" ms-data-vm="el"></div>
+        <button type="button" class="ui-helper-sorter" ms-if="el.sortable" 
+                ms-data-vm="el">▲</button>
+        <div class="ui-helper-resizer" ></div>
     </div>
-
 </div>
 <div class="ui-grid-viewport" style="width: 100%; overflow: auto; outline: 0px; 
      position: relative;" ms-on-scroll="scroll" ms-css-height="viewportHeight">
@@ -20,7 +28,6 @@
              >
             <div ms-css-width="getCellWidth($key)"  class="ui-grid-td" >
                 <div class="cell" ms-dblclick="edit">{{$val}}</div><input ms-duplex="$val" style="display: none" ms-blur="rollback(min+$index, $key)">
-
             </div>
         </div>
     </div>
@@ -57,9 +64,22 @@
         border: 1px solid #eee;
         background: white;
     }
+    .ui-helper-sorter{
+        position: absolute;
+        top: 0;
+        right: 8px;
+        width: 10px;
+        height: 100%;
+        margin: 0px;
+        border:none 0;
+        color:black;
+        cursor: pointer;
+        font-family: Arial、Helvetica;
+        font-size:8px;
+        background: transparent;
+    }
     .ui-helper-resizer{
         position: absolute;
-        z-index:0;
         top: 0;
         right: 0px;
         width: 5px;

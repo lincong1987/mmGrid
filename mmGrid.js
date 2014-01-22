@@ -46,13 +46,14 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                 el.width = el.width || options.columnWidth
                 el.className = el.className || ""
                 el.sortable = !!el.sortable
+                el.sortTrend = "asc"
                 el.toggle = true
                 ret.push(el)
             }
             return ret
         }
         var top = 0
-        var gridLeft = avalon(element).offset().left, resizeStart = 0, resizeTarget
+
         var model = avalon.define(data.gridId, function(vm) {
             vm.active = options.active;
             vm.rows = []
@@ -86,31 +87,52 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                     input.value = input.value// 让光标位于文字之的后
                 }
             }
+            vm.theadChick = function(e) {
+                var target = e.target
+                if (target.className.indexOf("ui-helper-sorter") !== -1) {
+                    e.preventDefault()
+                    var proxy = target.parentNode["data-vm"]
+                    var field = proxy.field
+                    var trend = target.innerHTML.trim() === "▲"
+                    vm.rows.sort(function(a, b) {
+                        var ret = a[field] - b[field]
+                        return ret * (trend ? 1 : -1)
+                    })
+                    var models = vm.rows.$model, j = vm.min
+                    for(var i = 0, el; el = models[i]; i ++){//同步
+                        rawDatas[j + i] = el
+                    }
+                    target.innerHTML = trend ? "▼" : "▲"
+                }
+            }
             vm.theadDown = function(e) {
                 var target = e.target
                 if (target.className.indexOf("ui-helper-resizer") !== -1) {
                     e.preventDefault()
                     vm.resizeToggle = true
-                    gridLeft = avalon(element).offset().left
-                    resizeStart = e.pageX
-                    resizeTarget = target
+                    var gridLeft = avalon(element).offset().left
+                    var resizeStart = e.pageX
+                    var resizeTarget = target
                     vm.resizeLeft = e.pageX - gridLeft
+                    var moveFn = avalon.bind(window, "mousemove", function(e) {
+                        e.preventDefault()
+                        if (resizeTarget) {
+                            vm.resizeLeft = e.pageX - gridLeft
+                        }
+                    })
+                    var upFn = avalon.bind(window, "mouseup", function(e) {
+                        e.preventDefault()
+                        if (resizeTarget) {
+                            var proxy = resizeTarget.parentNode["data-vm"]
+                            proxy.width = proxy.width + e.pageX - resizeStart
+                            resizeTarget = vm.resizeToggle = false
+                            avalon.unbind(window, "mousemove", moveFn)
+                            avalon.unbind(window, "mouseup", upFn)
+                        }
+                    })
                 }
             }
-            vm.theadMove = function(e) {
-                e.preventDefault()
-                if (resizeTarget) {
-                    vm.resizeLeft = e.pageX - gridLeft
-                }
-            }
-            vm.theadUp = function(e) {
-                e.preventDefault()
-                if (resizeTarget) {
-                    var proxy = resizeTarget["data-vm"]
-                    proxy.width = proxy.width + e.pageX - resizeStart
-                    resizeTarget = vm.resizeToggle = false
-                }
-            }
+
 
             vm.rollback = function(index, name) {
                 var obj = rawDatas[index]
