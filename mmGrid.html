@@ -1,12 +1,19 @@
-<div class="slick-viewport" style="width: 100%; overflow: auto; outline: 0px; 
+
+<div class="ui-grid-header-columns" ms-css-height="headerHeight">
+    <div ms-repeat="columns" class="ui-grid-header-column ui-state-default" ms-css-width="el.width" ms-class="el.className" ms-visible="el.toggle">{{el.text}}</div>
+</div>
+<div class="ui-grid-viewport" style="width: 100%; overflow: auto; outline: 0px; 
      position: relative;" ms-on-scroll="sss" ms-css-height="viewportHeight">
-    <div ms-each="rows" class="grid-canvas "ms-css-height="realHeight" >
-        <div class="slick-row ui-widget-content" 
+    <div ms-each-row="rows" class="ui-grid-canvas "ms-css-height="realHeight" >
+        <div class="ui-grid-row ui-widget-content" 
              ms-hover="row-hover"
              ms-css-top="srollTop + $index * 25"
              ms-class="even: (min + $index) % 2 === 0"  
              ms-class-1="odd: (min + $index) % 2 !== 0" 
              ms-visible="min+$index < total"
-             >{{el}}--- {{$index+min}}</div>
+             ms-with="row" data-with-sorted="order"
+             >
+            <span  ms-css-width="getCellWidth($key)" style="display: inline-block" >{{$val}}</span>
+        </div>
     </div>
 </div>

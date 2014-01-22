@@ -9,9 +9,36 @@
 
         <script>
             require("mmGrid", function() {
+                var cs = "_0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+                var str = function(len, prefix) {
+                    if (!len)
+                        len = 10;
+                    var s = typeof prefix === "string" ? prefix : '';
+                    for (var i = 0; i < len; ++i) {
+                        var n = Math.random() * 1e6;
+                        s += cs.charAt(n % cs.length);
+                    }
+                    return s;
+                }
+                var createRows = function(n) {
+                    var ret = []
+                    for (var i = 0; i < n; i++) {
+                        ret[i] = {
+                              birthday: new Date - i,
+                            name: str(),
+                          
+                            department: str()
+                        }
+                    }
+                    return ret
+                }
                 avalon.define("xxx", function(vm) {
                     vm.grid = {
-                        rows: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".split("")
+                        rows: createRows(100),
+                        columns: [{field: "name", text: "姓名",width:300}, {field: "birthday", text: "生日"}, {field: "department", text: "部门"}]
+                    }
+                    vm.order = function(){
+                        return ["name","birthday","department"]
                     }
                     vm.$skipArray = ["grid"]
                 })
@@ -19,15 +46,38 @@
             })
         </script>
         <style>
-            .grid-canvas {
+            .ui-grid-canvas {
                 position: relative;
                 outline: 0;
             }
 
-            .slick-row {
+            .ui-grid-header-columns, .ui-grid-headerrow-columns {
+                position: relative;
+                white-space: nowrap;
+                cursor: default;
+                overflow: hidden;
+            }
+
+            .ui-grid-header-column.ui-state-default {
+                position: relative;
+                display: inline-block;
+                overflow: hidden;
+                -o-text-overflow: ellipsis;
+                text-overflow: ellipsis;
+                height: 16px;
+                line-height: 16px;
+                margin: 0;
+                padding: 4px;
+                border-right: 1px solid silver;
+                border-left: 0px;
+                border-top: 0px;
+                border-bottom: 0px;
+                float: left;
+            }
+            .ui-grid-row {
                 height: 25px;
             }
-            .slick-row.ui-widget-content, .slick-row.ui-state-active {
+            .ui-grid-row.ui-widget-content, .ui-grid-row.ui-state-active {
                 position: absolute;
                 border: 0px;
                 width: 100%;
@@ -40,6 +90,28 @@
             }
             .row-hover {
                 background: yellow;
+            }
+            .slick-cell {
+                height: 20px;
+            }
+            .slick-cell {
+                padding-left: 4px;
+                padding-right: 4px;
+            }
+            .slick-cell, .slick-headerrow-column {
+                position: absolute;
+                border: 1px solid transparent;
+                border-right: 1px dotted silver;
+                border-bottom-color: silver;
+                overflow: hidden;
+                -o-text-overflow: ellipsis;
+                text-overflow: ellipsis;
+                vertical-align: middle;
+                z-index: 1;
+                padding: 1px 2px 2px 1px;
+                margin: 0;
+                white-space: nowrap;
+                cursor: default;
             }
         </style>
     </head>
