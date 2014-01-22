@@ -3,26 +3,7 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
     var useTransition = window.TransitionEvent || window.WebKitTransitionEvent
 
     var styleEl = document.getElementById("avalonStyle")
-    function setCursorPosition(textarea, rangeData) {
-        if (!rangeData) {
-            alert("You must get cursor position first.")
-        }
-        if (textarea.setSelectionRange) { // W3C
-            textarea.focus();
-            textarea.setSelectionRange(rangeData.start, rangeData.end);
-        } else if (textarea.createTextRange) { // IE
-            var oR = textarea.createTextRange();
-            // Fixbug :
-            // In IE, if cursor position at the end of textarea, the setCursorPosition function don't work
-            if (textarea.value.length === rangeData.start) {
-                oR.collapse(false)
-                oR.select();
-            } else {
-                oR.moveToBookmark(rangeData.bookmark);
-                oR.select();
-            }
-        }
-    }
+
     var widget = avalon.ui.grid = function(element, data, vmodels) {
         var $element = avalon(element), options = data.gridOptions, tabs = [],
                 model, el
@@ -74,20 +55,31 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                     }
                 }
             }
-            vm.edit = function() {
-                this.style.display = "none"
-                var input = this.nextSibling
-                input.style.display = "block"
-                input.focus()
-                if (window.netscape) {
-                    var n = input.value.length
-                    input.selectionStart = n
-                    input.selectionEnd = n
-                } else {
-                    input.value = input.value// 让光标位于文字之的后
+            vm.editCell = function(e) {//即时编辑某个单元格，事件代理
+                var target = e.target
+                if (target.className.indexOf("editable")!== -1) {
+                    target.style.display = "none"
+                    var input = target.nextSibling
+                    input.style.display = "block"
+                    input.focus()
+                    if (window.netscape) {
+                        var n = input.value.length
+                        input.selectionStart = n
+                        input.selectionEnd = n
+                    } else {
+                        input.value = input.value// 让光标位于文字之的后
+                    }
                 }
             }
-            vm.theadChick = function(e) {
+            vm.uneditCell = function(index, name) {//还原为文本状态
+                var obj = rawDatas[index]
+                if (obj) {
+                    obj[name] = this.value
+                }
+                this.style.display = "none"
+                this.previousSibling.style.display = "block"
+            }
+            vm.theadChick = function(e) {//对某一列进行排序，使用事件代理
                 var target = e.target
                 if (target.className.indexOf("ui-helper-sorter") !== -1) {
                     e.preventDefault()
@@ -99,13 +91,13 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                         return ret * (trend ? 1 : -1)
                     })
                     var models = vm.rows.$model, j = vm.min
-                    for(var i = 0, el; el = models[i]; i ++){//同步
+                    for (var i = 0, el; el = models[i]; i++) {//同步原始数组
                         rawDatas[j + i] = el
                     }
                     target.innerHTML = trend ? "▼" : "▲"
                 }
             }
-            vm.theadDown = function(e) {
+            vm.theadDown = function(e) {//实现表头拖动列宽，使用事件代理
                 var target = e.target
                 if (target.className.indexOf("ui-helper-resizer") !== -1) {
                     e.preventDefault()
@@ -133,15 +125,6 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                 }
             }
 
-
-            vm.rollback = function(index, name) {
-                var obj = rawDatas[index]
-                if (obj) {
-                    obj[name] = this.value
-                }
-                this.style.display = "none"
-                this.previousSibling.style.display = "block"
-            }
             vm.scroll = function(e) {
                 top = this.scrollTop
                 var min = Math.floor(top / options.rowHeight)
@@ -155,7 +138,6 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                 }
             }
         })
-        model.firstField = model.columns[0].field
         //比要显示的行数多五个
         var datas = avalon.mix(true, [], rawDatas.slice(0, max + 5))
         model.rows = datas

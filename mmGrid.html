@@ -14,7 +14,7 @@
     </div>
 </div>
 <div class="ui-grid-viewport" style="width: 100%; overflow: auto; outline: 0px; 
-     position: relative;" ms-on-scroll="scroll" ms-css-height="viewportHeight">
+     position: relative;" ms-on-scroll="scroll" ms-css-height="viewportHeight" ms-dblclick="editCell">
     <div ms-each-row="rows" class="ui-grid-tbody ui-helper-unselect "ms-css-height="realHeight" >
         <div class="ui-grid-tr ui-widget-content" 
              ms-hover="ui-state-hover"
@@ -26,11 +26,14 @@
              ms-with="row" data-with-sorted="order"  
              >
             <div ms-css-width="getCellWidth($key)"  class="ui-grid-td" >
-                <div class="cell" ms-dblclick="edit">{{$val}}</div><input ms-duplex="$val" style="display: none" ms-blur="rollback(min+$index, $key)">
+                <div class="editable">{{$val}}</div><input ms-duplex="$val" style="display: none" ms-blur="uneditCell(min+$index, $key)">
             </div>
         </div>
     </div>
 </div>
+<a class="ui-helper-slide-down" href="javascript:void(0)">
+    <div class="ui-helper-trigger"></div>
+</a>
 <div class="ui-grid-resizer" ms-visible="resizeToggle" ms-css-left="resizeLeft"></div>
 <style>
     .ui-grid-resizer{
@@ -48,6 +51,26 @@
         background: white;
         /*        overflow: hidden;*/
         position: relative;
+    }
+    .ui-helper-slide-down {
+        position: absolute;
+        top:0px;
+        right:20px;
+        background: red;
+        width:60px;
+        height:30px;
+    }
+    .ui-helper-trigger{
+        display: none;
+        position: relative;
+        top: 30px;
+        left:10px;
+        width:40px;
+        height:30px;
+        background: green;
+    }
+    .ui-helper-slide-down:hover .ui-helper-trigger{
+        display: block;
     }
     .ui-grid-thead{
         position: relative;
@@ -109,7 +132,7 @@
         height: 100%;
         background: white;
     }
-    .ui-grid-td .cell{
+    .ui-grid-td .editable{
         position: absolute;
         top:0px;
         left:0px;
@@ -128,8 +151,8 @@
         background: #e1eff8;
     }
     .ui-grid-td input{
-       width:100%;
-       height:95%;
+        width:100%;
+        height:95%;
     }
     .ui-helper-unselect{
         -webkit-touch-callout: none;
