@@ -3,7 +3,26 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
     var useTransition = window.TransitionEvent || window.WebKitTransitionEvent
 
     var styleEl = document.getElementById("avalonStyle")
-
+    function setCursorPosition(textarea, rangeData) {
+        if (!rangeData) {
+            alert("You must get cursor position first.")
+        }
+        if (textarea.setSelectionRange) { // W3C
+            textarea.focus();
+            textarea.setSelectionRange(rangeData.start, rangeData.end);
+        } else if (textarea.createTextRange) { // IE
+            var oR = textarea.createTextRange();
+            // Fixbug :
+            // In IE, if cursor position at the end of textarea, the setCursorPosition function don't work
+            if (textarea.value.length === rangeData.start) {
+                oR.collapse(false)
+                oR.select();
+            } else {
+                oR.moveToBookmark(rangeData.bookmark);
+                oR.select();
+            }
+        }
+    }
     var widget = avalon.ui.grid = function(element, data, vmodels) {
         var $element = avalon(element), options = data.gridOptions, tabs = [],
                 model, el
@@ -43,12 +62,24 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
             vm.min = 0
             vm.total = total
             vm.firstField = ""
-            vm.getCellWidth = function(name){
-                for(var i =0, el; el = vm.columns[i++];){
-                    if(el.field === name){
+            vm.headerHeight = options.headerHeight
+            vm.getCellWidth = function(name) {
+                for (var i = 0, el; el = vm.columns[i++]; ) {
+                    if (el.field === name) {
                         return el.width
                     }
                 }
+            }
+            vm.edit = function() {
+                this.style.display = "none"
+                var input = this.nextSibling
+                input.style.display = "block"
+                input.focus()
+                input.value = input.value
+            }
+            vm.rollback = function() {
+                this.style.display = "none"
+                this.previousSibling.style.display = "block"
             }
             vm.sss = function(e) {
                 top = this.scrollTop

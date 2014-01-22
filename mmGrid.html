@@ -1,20 +1,23 @@
 
 <div class="ui-grid-thead" ms-css-height="headerHeight">
-    <div ms-repeat="columns" class="ui-grid-col ui-state-default" ms-css-width="el.width" ms-class="el.className" ms-visible="el.toggle">{{el.text}}</div>
+    <div ms-repeat="columns" ms-css-height="headerHeight" class="ui-grid-col ui-state-default" ms-css-width="el.width" ms-class="el.className" ms-visible="el.toggle">{{el.text}}</div>
 </div>
 <div class="ui-grid-viewport" style="width: 100%; overflow: auto; outline: 0px; 
      position: relative;" ms-on-scroll="sss" ms-css-height="viewportHeight">
-    <div ms-each-row="rows" class="ui-grid-tbody "ms-css-height="realHeight" >
+    <div ms-each-row="rows" class="ui-grid-tbody ui-helper-unselect "ms-css-height="realHeight" >
         <div class="ui-grid-tr ui-widget-content" 
              ms-hover="row-hover"
              ms-css-top="srollTop + $index * 25"
              ms-class="even: (min + $index) % 2 === 0"  
              ms-class-1="odd: (min + $index) % 2 !== 0" 
              ms-visible="min+$index < total"
-             ms-css-height="rowHeight"
+             ms-css-height="rowHeight" 
              ms-with="row" data-with-sorted="order"  
              >
-            <div ms-css-width="getCellWidth($key)" class="ui-grid-td" >{{$val}}</div>
+            <div ms-css-width="getCellWidth($key)"  class="ui-grid-td" >
+                <div class="cell" ms-dblclick="edit">{{$val}}</div><input ms-duplex="$val" style="display: none" ms-blur="rollback">
+
+            </div>
         </div>
     </div>
 </div>
@@ -35,7 +38,7 @@
         overflow: hidden;
         float: left;
         border: 1px solid #eee;
-        background: #f1f1f1;
+        background: white;
     }
     .ui-grid-tbody {
         position: relative;
@@ -46,7 +49,7 @@
         height:25px;
         overflow: hidden;
     }
-     .ui-grid-tr:hover .ui-grid-td{
+    .ui-grid-tr:hover .ui-grid-td{
         background:rgb(255,249,117);
     }
     .ui-grid-td{
@@ -59,8 +62,31 @@
         height: 100%;
         background: white;
     }
+    .ui-grid-td .cell{
+        position: absolute;
+        top:0px;
+        left:0px;
+        right:0px;
+        bottom:0px;
+        vertical-align: middle;
+        z-index: 1;
+        padding: 2px 4px 0px 4px;
+        -o-text-overflow: ellipsis;
+        text-overflow: ellipsis;
+        vertical-align: middle;
+        white-space: nowrap;
+        cursor: default;
+    }
     .ui-grid-tr.even .ui-grid-td{
         background: #e1eff8;
+    }
+    .ui-helper-unselect{
+         -webkit-touch-callout: none;
+   -webkit-user-select: none;
+   -khtml-user-select: none;
+   -moz-user-select: none;
+   -ms-user-select: none;
+   user-select: none;
     }
 
 </style>
