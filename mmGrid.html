@@ -9,8 +9,7 @@
          ms-visible="el.toggle" 
          ms-data-vm="el">
         {{el.text}}
-        <button type="button" class="ui-helper-sorter" ms-if="el.sortable" 
-                ms-data-vm="el">▲</button>
+        <button type="button" class="ui-helper-sorter" ms-if="el.sortable" lang="ru"  >▲</button>
         <div class="ui-helper-resizer" ></div>
     </div>
 </div>
@@ -75,7 +74,9 @@
         color:black;
         cursor: pointer;
         font-family: Arial、Helvetica;
+        padding:0px;
         font-size:8px;
+        -webkit-text-size-adjust:none;
         background: transparent;
     }
     .ui-helper-resizer{
@@ -125,6 +126,10 @@
     }
     .ui-grid-tr.even .ui-grid-td{
         background: #e1eff8;
+    }
+    .ui-grid-td input{
+       width:100%;
+       height:95%;
     }
     .ui-helper-unselect{
         -webkit-touch-callout: none;
