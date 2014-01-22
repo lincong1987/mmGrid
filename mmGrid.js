@@ -77,20 +77,22 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                 input.focus()
                 input.value = input.value
             }
-            vm.rollback = function() {
+            vm.rollback = function(index, name) {
+                var obj = rawDatas[index]
+                if (obj) {
+                    console.log([index, name, this.value])
+                    obj[name] = this.value
+                    console.log(obj[name])
+                }
                 this.style.display = "none"
                 this.previousSibling.style.display = "block"
             }
             vm.scroll = function(e) {
                 top = this.scrollTop
-              
                 var min = Math.floor(top / options.rowHeight)
-                if(min !== model.min){
-                 //   console.log([min, model.min])
-                }
                 if (min + max <= total) {
                     model.min = min
-                    var datas = options.rows.slice(min, min + max + 5)
+                    var datas = avalon.mix(true, [], rawDatas.slice(min, min + max + 5))
                     for (var i = 0, n = datas.length; i < n; i++) {
                         vm.rows.set(i, datas[i])
                     }
@@ -100,7 +102,7 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
         })
         model.firstField = model.columns[0].field
         //比要显示的行数多五个
-        var datas = options.rows.slice(0, max + 5)
+        var datas = avalon.mix(true, [], rawDatas.slice(0, max + 5))
         model.rows = datas
         avalon.nextTick(function() {
             element.innerHTML = html

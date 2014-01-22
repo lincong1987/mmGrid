@@ -15,7 +15,7 @@
              ms-with="row" data-with-sorted="order"  
              >
             <div ms-css-width="getCellWidth($key)"  class="ui-grid-td" >
-                <div class="cell" ms-dblclick="edit">{{$val}}</div><input ms-duplex="$val" style="display: none" ms-blur="rollback">
+                <div class="cell" ms-dblclick="edit">{{$val}}</div><input ms-duplex="$val" style="display: none" ms-blur="rollback(min+$index, $key)">
 
             </div>
         </div>

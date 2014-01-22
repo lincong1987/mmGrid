@@ -26,14 +26,15 @@
                         ret[i] = {
                             birthday: new Date - i,
                             name: str(),
-                            department: str()
+                            department: i//str()
                         }
                     }
                     return ret
                 }
+                var a = createRows(100)
                 avalon.define("xxx", function(vm) {
                     vm.grid = {
-                        rows: createRows(100),
+                        rows: a,
                         columns: [{field: "name", text: "姓名", width: 300}, {field: "birthday", text: "生日"}, {field: "department", text: "部门"}]
                     }
                     vm.order = function() {
