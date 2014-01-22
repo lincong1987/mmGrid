@@ -1,6 +1,10 @@
 
-<div class="ui-grid-thead" ms-css-height="headerHeight">
-    <div ms-repeat="columns" ms-css-height="headerHeight" class="ui-grid-col ui-state-default" ms-css-width="el.width" ms-class="el.className" ms-visible="el.toggle">{{el.text}}</div>
+<div class="ui-grid-thead" ms-css-height="headerHeight" ms-mousedown="theadDown" ms-mousemove="theadMove" ms-mouseup="theadUp">
+    <div ms-repeat="columns" ms-css-height="headerHeight" class="ui-grid-col ui-state-default" ms-css-width="el.width" ms-class="el.className" ms-visible="el.toggle">
+        {{el.text}}
+        <div class="ui-helper-resizer" ms-data-vm="el"></div>
+    </div>
+
 </div>
 <div class="ui-grid-viewport" style="width: 100%; overflow: auto; outline: 0px; 
      position: relative;" ms-on-scroll="scroll" ms-css-height="viewportHeight">
@@ -21,10 +25,23 @@
         </div>
     </div>
 </div>
+<div class="ui-grid-resizer" ms-visible="resizeToggle" ms-css-left="resizeLeft"></div>
 <style>
+    .ui-grid-resizer{
+        display: none;
+        border:1px dashed #ccc;
+        height:99999px;
+        position: absolute;
+        border-left:none;
+        width:1px;
+        top:0px;
+        z-index: 9000;
+    }
     .ui-grid{
         border: 1px solid #eee;
         background: white;
+        /*        overflow: hidden;*/
+        position: relative;
     }
     .ui-grid-thead{
         position: relative;
@@ -39,6 +56,15 @@
         float: left;
         border: 1px solid #eee;
         background: white;
+    }
+    .ui-helper-resizer{
+        position: absolute;
+        z-index:0;
+        top: 0;
+        right: 0px;
+        width: 5px;
+        height: 100%;
+        cursor: col-resize;
     }
     .ui-grid-tbody {
         position: relative;

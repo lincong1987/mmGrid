@@ -52,6 +52,7 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
             return ret
         }
         var top = 0
+        var gridLeft = avalon(element).offset().left, resizeStart = 0, resizeTarget
         var model = avalon.define(data.gridId, function(vm) {
             vm.active = options.active;
             vm.rows = []
@@ -63,6 +64,8 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
             vm.total = total
             vm.firstField = ""
             vm.headerHeight = options.headerHeight
+            vm.resizeToggle = false
+            vm.resizeLeft = 1
             vm.getCellWidth = function(name) {
                 for (var i = 0, el; el = vm.columns[i++]; ) {
                     if (el.field === name) {
@@ -75,14 +78,44 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                 var input = this.nextSibling
                 input.style.display = "block"
                 input.focus()
-                input.value = input.value
+                if (window.netscape) {
+                    var n = input.value.length
+                    input.selectionStart = n
+                    input.selectionEnd = n
+                } else {
+                    input.value = input.value// 让光标位于文字之的后
+                }
             }
+            vm.theadDown = function(e) {
+                var target = e.target
+                if (target.className.indexOf("ui-helper-resizer") !== -1) {
+                    e.preventDefault()
+                    vm.resizeToggle = true
+                    gridLeft = avalon(element).offset().left
+                    resizeStart = e.pageX
+                    resizeTarget = target
+                    vm.resizeLeft = e.pageX - gridLeft
+                }
+            }
+            vm.theadMove = function(e) {
+                e.preventDefault()
+                if (resizeTarget) {
+                    vm.resizeLeft = e.pageX - gridLeft
+                }
+            }
+            vm.theadUp = function(e) {
+                e.preventDefault()
+                if (resizeTarget) {
+                    var proxy = resizeTarget["data-vm"]
+                    proxy.width = proxy.width + e.pageX - resizeStart
+                    resizeTarget = vm.resizeToggle = false
+                }
+            }
+
             vm.rollback = function(index, name) {
                 var obj = rawDatas[index]
                 if (obj) {
-                    console.log([index, name, this.value])
                     obj[name] = this.value
-                    console.log(obj[name])
                 }
                 this.style.display = "none"
                 this.previousSibling.style.display = "block"
