@@ -1,9 +1,9 @@
 <div class="slick-viewport" style="width: 100%; overflow: auto; outline: 0px; 
-     position: relative; height: 300px; background: red;" ms-on-scroll="sss">
-    <div ms-each="rows" class="grid-canvas " style="height:7000px;" >
+     position: relative;background: red;" ms-on-scroll="sss" ms-css-height="viewportHeight">
+    <div ms-each="rows" class="grid-canvas " ms-css-height="realHeight" >
         <div class="slick-row ui-widget-content" 
              ms-css-top="srollTop + $index * 25"
-             ms-class="even: $index % 2 === 0"  
-             ms-class-1="odd: $index % 2 !== 0">{{el}}--- {{$index}}</div>
+             ms-class="even: (min + $index) % 2 === 0"  
+             ms-class-1="odd: (min + $index) % 2 !== 0">{{el}}--- {{$index+min}}</div>
     </div>
 </div>
