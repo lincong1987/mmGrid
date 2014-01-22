@@ -81,9 +81,13 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                 this.style.display = "none"
                 this.previousSibling.style.display = "block"
             }
-            vm.sss = function(e) {
+            vm.scroll = function(e) {
                 top = this.scrollTop
+              
                 var min = Math.floor(top / options.rowHeight)
+                if(min !== model.min){
+                 //   console.log([min, model.min])
+                }
                 if (min + max <= total) {
                     model.min = min
                     var datas = options.rows.slice(min, min + max + 5)

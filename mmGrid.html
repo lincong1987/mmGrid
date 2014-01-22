@@ -3,10 +3,10 @@
     <div ms-repeat="columns" ms-css-height="headerHeight" class="ui-grid-col ui-state-default" ms-css-width="el.width" ms-class="el.className" ms-visible="el.toggle">{{el.text}}</div>
 </div>
 <div class="ui-grid-viewport" style="width: 100%; overflow: auto; outline: 0px; 
-     position: relative;" ms-on-scroll="sss" ms-css-height="viewportHeight">
+     position: relative;" ms-on-scroll="scroll" ms-css-height="viewportHeight">
     <div ms-each-row="rows" class="ui-grid-tbody ui-helper-unselect "ms-css-height="realHeight" >
         <div class="ui-grid-tr ui-widget-content" 
-             ms-hover="row-hover"
+             ms-hover="ui-state-hover"
              ms-css-top="srollTop + $index * 25"
              ms-class="even: (min + $index) % 2 === 0"  
              ms-class-1="odd: (min + $index) % 2 !== 0" 
@@ -49,8 +49,8 @@
         height:25px;
         overflow: hidden;
     }
-    .ui-grid-tr:hover .ui-grid-td{
-        background:rgb(255,249,117);
+    div.ui-grid-tr:hover .ui-grid-td, div.ui-state-hover .ui-grid-td{
+        background:rgb(255,249,117)!important;
     }
     .ui-grid-td{
         margin-left:-1px;
@@ -81,12 +81,12 @@
         background: #e1eff8;
     }
     .ui-helper-unselect{
-         -webkit-touch-callout: none;
-   -webkit-user-select: none;
-   -khtml-user-select: none;
-   -moz-user-select: none;
-   -ms-user-select: none;
-   user-select: none;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        -khtml-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
     }
 
 </style>
