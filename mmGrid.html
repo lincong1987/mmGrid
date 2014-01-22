@@ -2,6 +2,7 @@
      position: relative;" ms-on-scroll="sss" ms-css-height="viewportHeight">
     <div ms-each="rows" class="grid-canvas "ms-css-height="realHeight" >
         <div class="slick-row ui-widget-content" 
+             ms-hover="row-hover"
              ms-css-top="srollTop + $index * 25"
              ms-class="even: (min + $index) % 2 === 0"  
              ms-class-1="odd: (min + $index) % 2 !== 0" 
