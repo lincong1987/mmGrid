@@ -21,7 +21,7 @@
 <style>
     .ui-grid{
         border: 1px solid #eee;
-        background: red;
+        background: white;
     }
     .ui-grid-thead{
         position: relative;
@@ -46,14 +46,21 @@
         height:25px;
         overflow: hidden;
     }
+     .ui-grid-tr:hover .ui-grid-td{
+        background:rgb(255,249,117);
+    }
     .ui-grid-td{
         margin-left:-1px;
         border: 1px solid #eee;
-        background: white;
         position: relative;
         display: block;
         overflow: hidden;
         float: left;
         height: 100%;
+        background: white;
     }
+    .ui-grid-tr.even .ui-grid-td{
+        background: #e1eff8;
+    }
+
 </style>
