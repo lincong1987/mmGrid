@@ -14,11 +14,15 @@
              ms-css-height="rowHeight"
              ms-with="row" data-with-sorted="order"  
              >
-            <span  ms-css-width="getCellWidth($key)" class="ui-grid-td" >{{$val}}</span>
+            <div ms-css-width="getCellWidth($key)" class="ui-grid-td" >{{$val}}</div>
         </div>
     </div>
 </div>
 <style>
+    .ui-grid{
+        border: 1px solid #eee;
+        background: red;
+    }
     .ui-grid-thead{
         position: relative;
         white-space: nowrap;
@@ -27,21 +31,28 @@
     }
     .ui-grid-col{
         position: relative;
-        display: inline-block;
+        margin-top:-1px;
         overflow: hidden;
         float: left;
+        border: 1px solid #eee;
+        background: #f1f1f1;
     }
     .ui-grid-tbody {
         position: relative;
         outline: 0;
     }
     .ui-grid-tr{
-        position: relative;
+        position: absolute;
+        height:25px;
         overflow: hidden;
     }
     .ui-grid-td{
+        margin-left:-1px;
         border: 1px solid #eee;
-        display: inline-block;
+        background: white;
+        position: relative;
+        display: block;
+        overflow: hidden;
         float: left;
         height: 100%;
     }

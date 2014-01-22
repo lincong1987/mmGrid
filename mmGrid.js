@@ -9,7 +9,7 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                 model, el
         var fragment = document.createDocumentFragment()
 
-        $element.addClass(" ui-accordion ui-widget ui-helper-reset")
+        $element.addClass(" ui-grid ui-widget ui-helper-reset")
         var rawDatas = options.rows
         var max = Math.min(rawDatas.length, options.maxRows)
         var total = rawDatas.length
@@ -42,6 +42,7 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
             vm.srollTop = 0
             vm.min = 0
             vm.total = total
+            vm.firstField = ""
             vm.getCellWidth = function(name){
                 for(var i =0, el; el = vm.columns[i++];){
                     if(el.field === name){
@@ -62,6 +63,7 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                 }
             }
         })
+        model.firstField = model.columns[0].field
         //比要显示的行数多五个
         var datas = options.rows.slice(0, max + 5)
         model.rows = datas

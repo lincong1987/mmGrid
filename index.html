@@ -24,9 +24,8 @@
                     var ret = []
                     for (var i = 0; i < n; i++) {
                         ret[i] = {
-                              birthday: new Date - i,
+                            birthday: new Date - i,
                             name: str(),
-                          
                             department: str()
                         }
                     }
@@ -35,10 +34,10 @@
                 avalon.define("xxx", function(vm) {
                     vm.grid = {
                         rows: createRows(100),
-                        columns: [{field: "name", text: "姓名",width:300}, {field: "birthday", text: "生日"}, {field: "department", text: "部门"}]
+                        columns: [{field: "name", text: "姓名", width: 300}, {field: "birthday", text: "生日"}, {field: "department", text: "部门"}]
                     }
-                    vm.order = function(){
-                        return ["name","birthday","department"]
+                    vm.order = function() {
+                        return ["name", "birthday", "department"]
                     }
                     vm.$skipArray = ["grid"]
                 })
@@ -46,15 +45,15 @@
             })
         </script>
         <style>
-        
-        
+
+
 /*            .even{
                 background: silver;
             }
             .odd {
                 background: #e4e4e4;
-            }
-          */
+            }*/
+
         </style>
     </head>
     <body ms-controller="xxx">
