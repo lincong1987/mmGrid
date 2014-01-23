@@ -16,7 +16,10 @@
 <div class="ui-grid-viewport" style="width: 100%; overflow: auto; outline: 0px; 
      position: relative;" ms-on-scroll="scroll" ms-css-height="viewportHeight" ms-dblclick="editCell">
     <a class="ui-helper-slide-up"  id="#VMID#SlideUp" ms-click="showTbody"></a>
-    <div class="ui-grid-backboard"></div>
+    <div class="ui-grid-backboard" ms-visible="backboardToggle" ms-css-height="viewportHeight">
+        <h1>显示列</h1>
+        <label ms-repeat="columns"><input type="checkbox" ms-duplex-radio="el.toggle"><span>{{el.text}}</span></label>
+    </div>
     <div ms-each-row="rows" id="#VMID#Tbody" class="ui-grid-tbody ui-helper-unselect "ms-css-height="realHeight" >
         <div class="ui-grid-tr ui-widget-content" 
              ms-hover="ui-state-hover"
@@ -27,7 +30,7 @@
              ms-css-height="rowHeight" 
              ms-with="row" data-with-sorted="order"  
              >
-            <div ms-css-width="getCellWidth($key)"  class="ui-grid-td" >
+            <div ms-css-width="getCellWidth($key)" ms-visible="getCellToggle($key)" class="ui-grid-td" >
                 <div class="editable">{{$val}}</div><input ms-duplex="$val" style="display: none" ms-blur="uneditCell(min+$index, $key)">
             </div>
         </div>
@@ -53,6 +56,39 @@
         background: white;
         /*        overflow: hidden;*/
         position: relative;
+    }
+    .ui-grid-backboard{
+        box-sizing: border-box;
+        padding:10px;
+        position: relative;
+        background-image: url(img/furley_bg.png);
+        background-image: -webkit-image-set(
+            url(img/furley_bg.png) 1x,
+            url(img/furley_bg_@2X.png) 2x
+            );
+        -webkit-box-shadow: inset 0 0 2px 1px #d9d9d9;
+        -moz-box-shadow: inset 0 0 2px 1px #d9d9d9;
+        -o-box-shadow: inset 0 0 2px 1px #d9d9d9;
+        -ms-box-shadow: inset 0 0 2px 1px #d9d9d9;
+        box-shadow: inset 0 0 2px 1px #d9d9d9;
+        text-align: left;
+    }
+    .ui-grid-backboard h1{
+        margin: 0 10px 5px 10px;
+        padding: 10px 0 5px 0;
+        font-size: 1em;
+        font-weight: bold;
+        line-height: 1.8;
+        border-bottom: 1px solid #ccc;
+    }
+    .ui-grid-backboard label {
+        display: inline-block;
+        width: 95px;
+        font-size: 1em;
+        line-height: 2.2;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
     .ui-helper-slide-down {
         position: absolute;
@@ -81,10 +117,11 @@
         right: 20px;
         bottom:0px;
         display: none;
+        z-index: 21;
         width: 50px;
         height: 20px;
-      /*  background: #fff url(img/arrow_up.png) no-repeat center center;*/
-       background: #f1f1f1;
+        /*  background: #fff url(img/arrow_up.png) no-repeat center center;*/
+        background: #f1f1f1;
         border: 1px solid #ccc;
         border-bottom: 0;
         -webkit-border-radius: 2px;
@@ -97,18 +134,7 @@
         box-shadow: 1px 1px 3px #ccc;
         cursor: pointer;
     }
-    .ui-helper-trigger{
-        display: none;
-        position: relative;
-        top: 30px;
-        left:10px;
-        width:40px;
-        height:30px;
-        background: green;
-    }
-    .ui-helper-slide-down:hover .ui-helper-trigger{
-        display: block;
-    }
+
     .ui-grid-thead{
         position: relative;
         white-space: nowrap;

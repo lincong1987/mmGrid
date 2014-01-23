@@ -67,7 +67,7 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
             }
             return ret
         }
-        var top = 0
+        var top = 0, slideDown = false
 
         var model = avalon.define(data.gridId, function(vm) {
             vm.active = options.active;
@@ -89,6 +89,14 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                     }
                 }
             }
+            vm.getCellToggle = function(name) {
+                for (var i = 0, el; el = vm.columns[i++]; ) {
+                    if (el.field === name) {
+                        return el.toggle
+                    }
+                }
+            }
+            vm.backboardToggle = false
             vm.editCell = function(e) {//即时编辑某个单元格，事件代理
                 var target = e.target
                 if (target.className.indexOf("editable") !== -1) {
@@ -159,11 +167,14 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                 }
             }
             vm.sildeDown = function() {
-                var id = model.$id + "SlideDown"
-                var target = document.getElementById(id)
-                target.style.top = this.offsetHeight + "px"
-                target.style.display = "block"
-                miniFx(target, "height", 0, 22, 400)
+                if (!slideDown) {
+                    slideDown = true
+                    var id = model.$id + "SlideDown"
+                    var target = document.getElementById(id)
+                    target.style.top = this.offsetHeight + "px"
+                    target.style.display = "block"
+                    miniFx(target, "height", 0, 22, 400)
+                }
             }
             vm.showTbody = function(e) {
                 var target = e.target
@@ -174,6 +185,7 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                 miniFx(target, "bottom", 0, -22, {
                     duration: 500,
                     complete: function() {
+                        slideDown = model.backboardToggle = false
                         target.style.display = "none"
                     }
                 })
@@ -184,14 +196,17 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                     duration: 500,
                     complete: function() {
                         target.style.display = "none"
+                        model.backboardToggle = true
                     }
                 })
                 var id = model.$id + "Tbody"
                 var tbody = document.getElementById(id)
                 var height = tbody.parentNode.offsetHeight
+
                 miniFx(tbody, "top", 20, height, {
                     duration: 1200,
                     complete: function() {
+
                         var id = model.$id + "SlideUp"
                         var elem = document.getElementById(id)
                         elem.style.display = "block"
