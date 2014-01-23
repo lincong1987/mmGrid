@@ -173,7 +173,6 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                     slideDown = true
                     var id = model.$id + "SlideDown"
                     var target = document.getElementById(id)
-                    target.style.top = this.offsetHeight + "px"
                     target.style.display = "block"
                     miniFx(target, "height", 0, 22, 400)
                 }
@@ -196,6 +195,7 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                 var id = model.$id + "Tbody"
                 var tbody = document.getElementById(id)
                 var height = tbody.parentNode.offsetHeight
+                // tbody.parentNode.style.overflow = "hidden"
                 miniFx(tbody, "top", height, 0, 800)
                 miniFx(target, "bottom", 0, -22, {
                     duration: 500,
@@ -222,8 +222,9 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                     complete: function() {
                         var id = model.$id + "SlideUp"
                         var elem = document.getElementById(id)
-                        elem.style.display = "block"
                         elem.style.bottom = "-22px"
+                        elem.style.display = "block"
+
                         miniFx(elem, "bottom", -22, 0, 400)
                     }
                 })

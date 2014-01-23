@@ -13,15 +13,18 @@
         <div ms-if="!el.lockWidth" class="ui-helper-resizer" ></div>
     </div>
 </div>
-<div class="ui-grid-viewport" style="width: 100%; overflow: auto; outline: 0px; 
-     position: relative;" ms-on-scroll="scroll" ms-css-height="viewportHeight" ms-dblclick="editCell">
+<div class="ui-grid-viewport" ms-css-height="viewportHeight">
     <a class="ui-helper-slide-up"  id="#VMID#SlideUp" ms-click="showTbody"></a>
-    <div class="ui-grid-backboard" ms-visible="backboardToggle" ms-css-height="viewportHeight">
+    <a class="ui-helper-slide-down" ms-click="hideTbody" id="#VMID#SlideDown" ms-mouseleave="hideSlider">
+    </a>
+    <div class="ui-grid-backboard" ms-visible="backboardToggle"  ms-css-height="viewportHeight" ms-css-top="srollTop">
         <h1>显示列</h1>
         <label ms-repeat="columns"><input type="checkbox" ms-disabled="el.lockDisplay"  ms-duplex-radio="el.toggle"><span>{{el.text}}</span></label>
     </div>
-    <div ms-each-row="rows" id="#VMID#Tbody" class="ui-grid-tbody ui-helper-unselect "ms-css-height="realHeight" >
+    <div class="ui-grid-tbody ui-helper-unselect" id="#VMID#Tbody" ms-on-scroll="scroll" ms-css-height="viewportHeight" ms-dblclick="editCell">
+        <!--        <div ms-each-row="rows" id="#VMID#Tbody" class="ui-grid-tbody ui-helper-unselect "ms-css-height="realHeight" >-->
         <div class="ui-grid-tr ui-widget-content" 
+             ms-repeat-row="rows" 
              ms-hover="ui-state-hover"
              ms-css-top="srollTop + $index * 25"
              ms-class="even: (min + $index) % 2 === 0"  
@@ -34,11 +37,10 @@
                 <div class="editable">{{$val}}</div><input ms-duplex="$val" style="display: none" ms-blur="uneditCell(min+$index, $key)">
             </div>
         </div>
+        <!--        </div>-->
     </div>
-</div>
-<a class="ui-helper-slide-down" ms-click="hideTbody" id="#VMID#SlideDown" ms-mouseleave="hideSlider">
-</a>
 
+</div>
 <div class="ui-grid-resizer" ms-visible="resizeToggle" ms-css-left="resizeLeft"></div>
 <style>
     .ui-grid-resizer{
@@ -54,12 +56,29 @@
     .ui-grid{
         border: 1px solid #eee;
         background: white;
-        /*        overflow: hidden;*/
         position: relative;
+    }
+    .ui-grid-tbody {
+        position: relative;
+        overflow: auto; 
+        width: 100%;
+        outline: 0;
+        z-index: 20;
+    }
+    .ui-grid-tr{
+        position: absolute;
+        height:25px;
+        overflow: hidden;
+    }
+    .ui-grid-viewport{
+        position: relative;
+        overflow: hidden;
+        outline: 0;
     }
     .ui-grid-backboard{
         box-sizing: border-box;
         padding:10px;
+        z-index: 1;
         position: relative;
         background-image: url(img/furley_bg.png);
         background-image: -webkit-image-set(
@@ -98,6 +117,7 @@
         width: 50px;
         height: 20px;
         display: none;
+        z-index: 30;
         /*  background: #fff url(img/arrow_down.png) no-repeat center center;*/
         background: #f1f1f1;
         border: 1px solid #ccc;
@@ -117,7 +137,7 @@
         right: 20px;
         bottom:0px;
         display: none;
-        z-index: 21;
+        z-index: 30;
         width: 50px;
         height: 20px;
         /*  background: #fff url(img/arrow_up.png) no-repeat center center;*/
@@ -173,15 +193,7 @@
         height: 100%;
         cursor: col-resize;
     }
-    .ui-grid-tbody {
-        position: relative;
-        outline: 0;
-    }
-    .ui-grid-tr{
-        position: absolute;
-        height:25px;
-        overflow: hidden;
-    }
+
     div.ui-grid-tr:hover .ui-grid-td, div.ui-state-hover .ui-grid-td{
         background:rgb(255,249,117)!important;
     }
