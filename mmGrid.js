@@ -166,6 +166,8 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                             avalon.unbind(window, "mouseup", upFn)
                         }
                     })
+                }else{
+                    
                 }
             }
             vm.showSlider = function() {

@@ -22,22 +22,21 @@
         <label ms-repeat="columns"><input type="checkbox" ms-disabled="el.lockDisplay"  ms-duplex-radio="el.toggle"><span>{{el.text}}</span></label>
     </div>
     <div class="ui-grid-tbody ui-helper-unselect" id="#VMID#Tbody" ms-on-scroll="scroll" ms-css-height="viewportHeight" ms-dblclick="editCell">
-        <!--        <div ms-each-row="rows" id="#VMID#Tbody" class="ui-grid-tbody ui-helper-unselect "ms-css-height="realHeight" >-->
-        <div class="ui-grid-tr ui-widget-content" 
-             ms-repeat-row="rows" 
-             ms-hover="ui-state-hover"
-             ms-css-top="srollTop + $index * 25"
-             ms-class="even: (min + $index) % 2 === 0"  
-             ms-class-1="odd: (min + $index) % 2 !== 0" 
-             ms-visible="min+$index < total"
-             ms-css-height="rowHeight" 
-             ms-with="row" data-with-sorted="order"  
-             >
-            <div ms-css-width="getCellWidth($key)" ms-visible="getCellToggle($key)" class="ui-grid-td" >
-                <div class="editable">{{$val}}</div><input ms-duplex="$val" style="display: none" ms-blur="uneditCell(min+$index, $key)">
+        <div style="position:relative"ms-css-height="realHeight" ms-each-row="rows" >
+            <div class="ui-grid-tr ui-widget-content" 
+                 ms-hover="ui-state-hover"
+                 ms-css-top="srollTop + $index * 25"
+                 ms-class="even: (min + $index) % 2 === 0"  
+                 ms-class-1="odd: (min + $index) % 2 !== 0" 
+                 ms-visible="min+$index < total"
+                 ms-css-height="rowHeight" 
+                 ms-with="row" data-with-sorted="order"  
+                 >
+                <div ms-css-width="getCellWidth($key)" ms-visible="getCellToggle($key)" class="ui-grid-td" >
+                    <div class="editable">{{$val}}</div><input ms-duplex="$val" style="display: none" ms-blur="uneditCell(min+$index, $key)">
+                </div>
             </div>
         </div>
-        <!--        </div>-->
     </div>
 
 </div>
