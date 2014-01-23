@@ -166,14 +166,27 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                     })
                 }
             }
-            vm.sildeDown = function() {
-                if (!slideDown) {
+            vm.showSlider = function() {
+                if (!slideDown && !model.backboardToggle) {
                     slideDown = true
                     var id = model.$id + "SlideDown"
                     var target = document.getElementById(id)
                     target.style.top = this.offsetHeight + "px"
                     target.style.display = "block"
                     miniFx(target, "height", 0, 22, 400)
+                }
+            }
+            vm.hideSlider = function() {
+                if (slideDown) {
+                    slideDown = false
+                    var id = model.$id + "SlideDown"
+                    var target = document.getElementById(id)
+                    miniFx(target, "height", 22, 0, {
+                        duration: 400,
+                        complete: function() {
+                            target.style.display = "none"
+                        }
+                    })
                 }
             }
             vm.showTbody = function(e) {
@@ -190,7 +203,7 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                     }
                 })
             }
-            vm.slideUp = function(e) {
+            vm.hideTbody = function(e) {
                 var target = e.target
                 miniFx(target, "height", 22, 0, {
                     duration: 500,
@@ -202,11 +215,9 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                 var id = model.$id + "Tbody"
                 var tbody = document.getElementById(id)
                 var height = tbody.parentNode.offsetHeight
-
                 miniFx(tbody, "top", 20, height, {
                     duration: 1200,
                     complete: function() {
-
                         var id = model.$id + "SlideUp"
                         var elem = document.getElementById(id)
                         elem.style.display = "block"

@@ -1,6 +1,6 @@
 
 <div class="ui-grid-thead" ms-css-height="headerHeight" 
-     ms-mousedown="theadDown"  ms-click="theadChick" ms-mouseenter="sildeDown">
+     ms-mousedown="theadDown"  ms-click="theadChick" ms-mouseenter="showSlider">
     <div class="ui-grid-col"
          ms-repeat="columns"
          ms-css-height="headerHeight"  
@@ -36,7 +36,7 @@
         </div>
     </div>
 </div>
-<a class="ui-helper-slide-down" ms-click="slideUp" id="#VMID#SlideDown">
+<a class="ui-helper-slide-down" ms-click="hideTbody" id="#VMID#SlideDown" ms-mouseleave="hideSlider">
 </a>
 
 <div class="ui-grid-resizer" ms-visible="resizeToggle" ms-css-left="resizeLeft"></div>
