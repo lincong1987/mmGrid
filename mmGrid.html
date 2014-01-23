@@ -1,6 +1,6 @@
 
 <div class="ui-grid-thead" ms-css-height="headerHeight" 
-     ms-mousedown="theadDown"  ms-click="theadChick">
+     ms-mousedown="theadDown"  ms-click="theadChick" ms-mouseenter="sildeDown">
     <div class="ui-grid-col"
          ms-repeat="columns"
          ms-css-height="headerHeight"  
@@ -15,7 +15,8 @@
 </div>
 <div class="ui-grid-viewport" style="width: 100%; overflow: auto; outline: 0px; 
      position: relative;" ms-on-scroll="scroll" ms-css-height="viewportHeight" ms-dblclick="editCell">
-    <div ms-each-row="rows" class="ui-grid-tbody ui-helper-unselect "ms-css-height="realHeight" >
+    <a class="ui-helper-slide-up"  id="#VMID#SlideUp" ms-click="showTbody"></a>
+    <div ms-each-row="rows" id="#VMID#Tbody" class="ui-grid-tbody ui-helper-unselect "ms-css-height="realHeight" >
         <div class="ui-grid-tr ui-widget-content" 
              ms-hover="ui-state-hover"
              ms-css-top="srollTop + $index * 25"
@@ -31,9 +32,9 @@
         </div>
     </div>
 </div>
-<a class="ui-helper-slide-down" href="javascript:void(0)">
-    <div class="ui-helper-trigger"></div>
+<a class="ui-helper-slide-down" ms-click="slideUp" id="#VMID#SlideDown">
 </a>
+
 <div class="ui-grid-resizer" ms-visible="resizeToggle" ms-css-left="resizeLeft"></div>
 <style>
     .ui-grid-resizer{
@@ -54,11 +55,46 @@
     }
     .ui-helper-slide-down {
         position: absolute;
-        top:0px;
-        right:20px;
-        background: red;
-        width:60px;
-        height:30px;
+        top: 0;
+        right: 20px;
+        display: block;
+        width: 50px;
+        height: 20px;
+        display: none;
+        /*  background: #fff url(img/arrow_down.png) no-repeat center center;*/
+        background: #f1f1f1;
+        border: 1px solid #ccc;
+        border-top: 0;
+        -webkit-border-radius: 2px;
+        -moz-border-radius: 2px;
+        border-radius: 2px;
+        -webkit-box-shadow: 1px 1px 3px #ccc;
+        -moz-box-shadow: 1px 1px 3px #ccc;
+        -o-box-shadow: 1px 1px 3px #ccc;
+        -ms-box-shadow: 1px 1px 3px #ccc;
+        box-shadow: 1px 1px 3px #ccc;
+        cursor: pointer;
+    }
+    .ui-helper-slide-up {
+        position: absolute;
+        right: 20px;
+        bottom:0px;
+        display: none;
+        width: 50px;
+        height: 20px;
+      /*  background: #fff url(img/arrow_up.png) no-repeat center center;*/
+       background: #f1f1f1;
+        border: 1px solid #ccc;
+        border-bottom: 0;
+        -webkit-border-radius: 2px;
+        -moz-border-radius: 2px;
+        border-radius: 2px;
+        -webkit-box-shadow: 1px 1px 3px #ccc;
+        -moz-box-shadow: 1px 1px 3px #ccc;
+        -o-box-shadow: 1px 1px 3px #ccc;
+        -ms-box-shadow: 1px 1px 3px #ccc;
+        box-shadow: 1px 1px 3px #ccc;
+        cursor: pointer;
     }
     .ui-helper-trigger{
         display: none;

@@ -4,6 +4,40 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
 
     var styleEl = document.getElementById("avalonStyle")
 
+    function miniFx(elem, prop, from, to, opts) {
+        var startTime = new Date
+        var change = to - from
+        if (typeof opts === "number") {
+            duration = opts
+            opts = {
+                duration: duration
+            }
+        } else {
+            opts = opts || {}
+        }
+        var complete = typeof opts.complete == "function" ? opts.complete : function() {
+        }
+        var duration = opts.duration || 700
+        var easing = typeof opts.easing == "function" ? opts.easing : function(per) {
+            return (-Math.cos(per * Math.PI) / 2) + 0.5
+        }
+        var id = setInterval(function() {
+            var per = (new Date - startTime) / duration
+            var end = per >= 1
+            var cur = (end ? to : from + easing(per) * change)
+            if (/^scroll/.test(prop)) {
+                elem[prop] = cur + "px"
+            } else {
+                avalon.css(elem, prop, cur)
+            }
+            console.log("11111111111")
+            if (end) {
+                clearInterval(id)
+                complete.call(elem)
+            }
+        }, 13)
+    }
+
     var widget = avalon.ui.grid = function(element, data, vmodels) {
         var $element = avalon(element), options = data.gridOptions, tabs = [],
                 model, el
@@ -57,7 +91,7 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
             }
             vm.editCell = function(e) {//即时编辑某个单元格，事件代理
                 var target = e.target
-                if (target.className.indexOf("editable")!== -1) {
+                if (target.className.indexOf("editable") !== -1) {
                     target.style.display = "none"
                     var input = target.nextSibling
                     input.style.display = "block"
@@ -124,7 +158,48 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                     })
                 }
             }
-
+            vm.sildeDown = function() {
+                var id = model.$id + "SlideDown"
+                var target = document.getElementById(id)
+                target.style.top = this.offsetHeight + "px"
+                target.style.display = "block"
+                miniFx(target, "height", 0, 22, 400)
+            }
+            vm.showTbody = function(e) {
+                var target = e.target
+                var id = model.$id + "Tbody"
+                var tbody = document.getElementById(id)
+                var height = tbody.parentNode.offsetHeight
+                miniFx(tbody, "top", height, 0, 1200)
+                miniFx(target, "bottom", 0, -22, {
+                    duration: 500,
+                    complete: function() {
+                        target.style.display = "none"
+                    }
+                })
+            }
+            vm.slideUp = function(e) {
+                var target = e.target
+                miniFx(target, "height", 22, 0, {
+                    duration: 500,
+                    complete: function() {
+                        target.style.display = "none"
+                    }
+                })
+                var id = model.$id + "Tbody"
+                var tbody = document.getElementById(id)
+                var height = tbody.parentNode.offsetHeight
+                miniFx(tbody, "top", 20, height, {
+                    duration: 1200,
+                    complete: function() {
+                        var id = model.$id + "SlideUp"
+                        var elem = document.getElementById(id)
+                        elem.style.display = "block"
+                        elem.style.bottom = "-22px"
+                        miniFx(elem, "bottom", -22, 0, 400)
+                    }
+                })
+            }
             vm.scroll = function(e) {
                 top = this.scrollTop
                 var min = Math.floor(top / options.rowHeight)
@@ -142,7 +217,7 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
         var datas = avalon.mix(true, [], rawDatas.slice(0, max + 5))
         model.rows = datas
         avalon.nextTick(function() {
-            element.innerHTML = html
+            element.innerHTML = html.replace(/#VMID#/g, model.$id)
             avalon.scan(element, [model].concat(vmodels))
         })
     }
@@ -157,3 +232,4 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
     }
     return avalon
 })
+
