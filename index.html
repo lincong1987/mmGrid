@@ -36,9 +36,9 @@
                     vm.grid = {
                         rows: a,
                         columns: [{field: "name", text: "姓名", width: 300},
-                            {field: "birthday", text: "生日", sortable: true
+                            {field: "birthday", text: "生日", sortable: true, lockDisplay: true
                             },
-                            {field: "department", text: "部门"}
+                            {field: "department", text: "部门",sortable: true}
                         ]
                     }
                     vm.order = function() {

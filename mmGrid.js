@@ -30,7 +30,6 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
             } else {
                 avalon.css(elem, prop, cur)
             }
-            console.log("11111111111")
             if (end) {
                 clearInterval(id)
                 complete.call(elem)
@@ -63,6 +62,9 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                 el.sortable = !!el.sortable
                 el.sortTrend = "asc"
                 el.toggle = true
+                el.lockDisplay = typeof el.lockDisplay === "boolean" ? el.lockDisplay : false
+                el.lockWidth = typeof el.lockWidth === "boolean" ? el.lockWidth : false
+
                 ret.push(el)
             }
             return ret
@@ -194,7 +196,7 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                 var id = model.$id + "Tbody"
                 var tbody = document.getElementById(id)
                 var height = tbody.parentNode.offsetHeight
-                miniFx(tbody, "top", height, 0, 1200)
+                miniFx(tbody, "top", height, 0, 800)
                 miniFx(target, "bottom", 0, -22, {
                     duration: 500,
                     complete: function() {
@@ -216,7 +218,7 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                 var tbody = document.getElementById(id)
                 var height = tbody.parentNode.offsetHeight
                 miniFx(tbody, "top", 20, height, {
-                    duration: 1200,
+                    duration: 800,
                     complete: function() {
                         var id = model.$id + "SlideUp"
                         var elem = document.getElementById(id)

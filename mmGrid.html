@@ -10,7 +10,7 @@
          ms-data-vm="el">
         {{el.text}}
         <button type="button" class="ui-helper-sorter" ms-if="el.sortable" lang="ru"  >▲</button>
-        <div class="ui-helper-resizer" ></div>
+        <div ms-if="!el.lockWidth" class="ui-helper-resizer" ></div>
     </div>
 </div>
 <div class="ui-grid-viewport" style="width: 100%; overflow: auto; outline: 0px; 
@@ -18,7 +18,7 @@
     <a class="ui-helper-slide-up"  id="#VMID#SlideUp" ms-click="showTbody"></a>
     <div class="ui-grid-backboard" ms-visible="backboardToggle" ms-css-height="viewportHeight">
         <h1>显示列</h1>
-        <label ms-repeat="columns"><input type="checkbox" ms-duplex-radio="el.toggle"><span>{{el.text}}</span></label>
+        <label ms-repeat="columns"><input type="checkbox" ms-disabled="el.lockDisplay"  ms-duplex-radio="el.toggle"><span>{{el.text}}</span></label>
     </div>
     <div ms-each-row="rows" id="#VMID#Tbody" class="ui-grid-tbody ui-helper-unselect "ms-css-height="realHeight" >
         <div class="ui-grid-tr ui-widget-content" 
