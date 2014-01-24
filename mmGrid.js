@@ -12,7 +12,7 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
             return true
         }
     }
-    //=========================与调整列的位置相关的函数=====================
+//=========================与调整列的位置相关的函数=====================
     function getPrev(el) {
         while (el = el.previousSibling) {
             if (el.nodeType === 1) {
@@ -35,7 +35,7 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
             left: offset.left,
             top: offset.top,
             width: el.offsetWidth / 2,
-            height: el.offsetHeight / 2
+            height: el.offsetHeight
         }
     }
     function getNextBox(el) {
@@ -44,10 +44,9 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
             left: offset.left,
             top: offset.top,
             width: el.offsetWidth / 2,
-            height: el.offsetHeight / 2
+            height: el.offsetHeight
         }
         nextBox.left += nextBox.width
-        nextBox.top += nextBox.height
         return nextBox
     }
 
@@ -121,18 +120,20 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
         var model = avalon.define(data.gridId, function(vm) {
             vm.active = options.active;
             vm.rows = []
+            vm.columnsOrder = options.columnsOrder
             vm.columns = makeColumns(options.columns)
             vm.viewportHeight = max * options.rowHeight
             vm.realHeight = total * options.rowHeight
             vm.realWidth = options.columns.length * options.columnWidth
             vm.srollTop = 0
             vm.scrollLeft = 0
-            vm.getColumnsOrder = function(){
+            vm.getColumnsOrder = function() {
                 return vm.columnsOrder
             }
+
             vm.min = 0
             vm.total = total
-            vm.firstField = ""
+            vm.$skipArray = ["columnsOrder"]
             vm.headerHeight = options.headerHeight
             vm.resizeToggle = false
             vm.resizeLeft = 1
@@ -236,12 +237,11 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                             break
                         }
                     } while ((curTH = curTH.parentNode));
-
                     var prev = getPrev(curTH)
                     var next = getNext(curTH)
                     var prevBox = prev && getPrevBox(prev)
                     var nextBox = next && getNextBox(next)
-
+                    curTH.style.zIndex = 10
                     var resizeStart = e.pageX
                     var flag = true
                     var moveFn = avalon.bind(window, "mousemove", function(e) {
@@ -250,7 +250,37 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                             curTH.style.left = (e.pageX - resizeStart) + "px"
                             if (e.pageX - resizeStart < 0) {//向左移动
                                 if (prevBox && enter(prevBox, e)) {
-                                    prev.style.left = prev.offsetWidth +"px"
+                                    resizeStart = e.pageX
+                                    var index = +curTH.getAttribute("data-index")
+                                    var pindex = +prev.getAttribute("data-index")
+                                    var el = model.columns.splice(pindex, 1)[0]
+                                    model.columns.splice(index, 0, el.$model)
+                                    curTH.style.left = "0px"
+                                    var str = model.columnsOrder[index]
+                                    model.columnsOrder[index] = model.columnsOrder[pindex]
+                                    model.columnsOrder[pindex] = str
+                                    prev = getPrev(curTH)
+                                    next = getNext(curTH)
+                                    prevBox = prev && getPrevBox(prev)
+                                    nextBox = next && getNextBox(next)
+                                }
+                            } else {
+                                if (nextBox && enter(nextBox, e)) {
+                                    resizeStart = e.pageX
+                                    var index = +curTH.getAttribute("data-index")
+                                    var nindex = +next.getAttribute("data-index")
+                                    var el = model.columns.splice(nindex, 1)[0]
+                                    model.columns.splice(index, 0, el.$model)
+                                    curTH.style.left = "0px"
+                                    curTH.getAttribute("data-index", nindex)
+                                    next.getAttribute("data-index", index)
+                                    var str = model.columnsOrder[index]
+                                    model.columnsOrder[index] = model.columnsOrder[nindex]
+                                    model.columnsOrder[nindex] = str
+                                    prev = getPrev(curTH)
+                                    next = getNext(curTH)
+                                    prevBox = prev && getPrevBox(prev)
+                                    nextBox = next && getNextBox(next)
                                 }
                             }
                         }
@@ -259,6 +289,7 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                         e.preventDefault()
                         if (flag) {
                             flag = false
+
                             avalon.unbind(window, "mousemove", moveFn)
                             avalon.unbind(window, "mouseup", upFn)
                         }
