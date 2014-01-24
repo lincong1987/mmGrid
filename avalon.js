@@ -1164,15 +1164,15 @@
      **********************************************************************/
 
     avalon.define = function(name, factory) {
-        var args = aslice.call(arguments)
         if (typeof name !== "string") {
-            name = generateID()
-            args.unshift(name)
+            avalon.error("必须指定ID")
         }
-        if (typeof args[1] !== "function") {
+        if (typeof factory !== "function") {
             avalon.error("factory必须是函数")
         }
-        factory = args[1]
+        var scope = {
+            $watch: noop
+        }
         var scope = {
             $watch: noop
         }
@@ -2319,7 +2319,7 @@
                 case "append":
                     var pool = el
                     var transation = documentFragment.cloneNode(false)
-                    var callback = getBindingCallback(parent.getAttribute("data-with-sorted"), data.vmodels)
+                    var callback = getBindingCallback(parent.getAttribute("data-with-ordered"), data.vmodels)
                     var keys = []
                     for (var key in pos) {//得到所有键名
                         if (pos.hasOwnProperty(key) && key !== "hasOwnProperty") {
@@ -2528,10 +2528,13 @@
                 if (!elem.name) { //如果用户没有写name属性，浏览器默认给它一个空字符串
                     elem.name = generateID()
                 }
-                if (/radio|checkbox|select/.test(elem.type)) {
-                    log("data-duplex-changed回调只能应用于非radio,checkbox,select等控件中")
-                } else {
-                    data.changed = getBindingCallback(elem.getAttribute("data-duplex-changed"), vmodels)
+                var attr = elem.getAttribute("data-duplex-changed")
+                if (attr) {
+                    if (/radio|checkbox|select/.test(elem.type)) {
+                        log("data-duplex-changed回调只能应用于非radio,checkbox,select等控件中")
+                    } else {
+                        data.changed = getBindingCallback(attr, vmodels)
+                    }
                 }
                 //由于情况特殊，不再经过parseExprProxy
                 parseExpr(data.value, vmodels, data, "duplex")
@@ -3033,7 +3036,7 @@
             if (removed.length) {
                 ret = this._del(a, removed.length)
                 if (arguments.length <= 2) { //如果没有执行添加操作，需要手动resetIndex
-                    notifySubscribers(this, "index", 0)
+                    notifySubscribers(this, "index", a)
                 }
             }
             if (arguments.length > 2) {

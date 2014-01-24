@@ -210,13 +210,13 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                 }
             }
             vm.theadDown = function(e) {//实现表头拖动列宽，使用事件代理
-                var target = e.target
-                if (target.className.indexOf("ui-helper-resizer") !== -1) {
+                var curTH = e.target;
+                if (curTH.className.indexOf("ui-helper-resizer") !== -1) {
                     e.preventDefault()
                     vm.resizeToggle = true
                     var gridLeft = avalon(element).offset().left
                     var resizeStart = e.pageX
-                    var resizeTarget = target
+                    var resizeTarget = curTH
                     vm.resizeLeft = e.pageX - gridLeft
                     var moveFn = avalon.bind(window, "mousemove", function(e) {
                         e.preventDefault()
@@ -237,8 +237,6 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                         }
                     })
                 } else {
-                    var curTH = e.target;
-
                     do {
                         if (curTH.className.indexOf("ui-grid-col") !== -1) {
                             break
@@ -254,39 +252,34 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                     var resizeStart = e.pageX
                     var flag = true
                     var origin = model.columnsOrder.concat()
+                    function swap(event, index, other) {
+                        resizeStart = event.pageX
+                        var str = model.columnsOrder[index]
+                        model.columnsOrder[index] = model.columnsOrder[other]
+                        model.columnsOrder[other] = str
+                        children = avalon.slice(parent.children)
+                        prev = getPrev(children, curTH)
+                        next = getNext(children, curTH)
+                        prevBox = prev && getPrevBox(prev)
+                        nextBox = next && getNextBox(next)
+                    }
                     var moveFn = avalon.bind(window, "mousemove", function(e) {
                         e.preventDefault()
                         if (flag) {
                             curTH.style.left = (e.pageX - resizeStart) + "px"
                             if (e.pageX - resizeStart < 0) {//向左移动
                                 if (prevBox && enter(prevBox, e)) {
-                                    resizeStart = e.pageX
                                     var index = children.indexOf(curTH)
                                     var other = children.indexOf(prev)
                                     parent.insertBefore(prev, curTH.nextSibling || null)
-                                    var str = model.columnsOrder[index]
-                                    model.columnsOrder[index] = model.columnsOrder[other]
-                                    model.columnsOrder[other] = str
-                                    children = avalon.slice(parent.children)
-                                    prev = getPrev(children, curTH)
-                                    next = getNext(children, curTH)
-                                    prevBox = prev && getPrevBox(prev)
-                                    nextBox = next && getNextBox(next)
+                                    swap(e, index, other)
                                 }
                             } else {
                                 if (nextBox && enter(nextBox, e)) {
-                                    resizeStart = e.pageX
                                     var index = children.indexOf(curTH)
                                     var other = children.indexOf(next)
                                     parent.insertBefore(next, curTH || null)
-                                    var str = model.columnsOrder[index]
-                                    model.columnsOrder[index] = model.columnsOrder[other]
-                                    model.columnsOrder[other] = str
-                                    children = avalon.slice(parent.children)
-                                    prev = getPrev(children, curTH)
-                                    next = getNext(children, curTH)
-                                    prevBox = prev && getPrevBox(prev)
-                                    nextBox = next && getNextBox(next)
+                                    swap(e, index, other)
                                 }
                             }
                         }
