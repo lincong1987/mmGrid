@@ -4,6 +4,15 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
 
     var styleEl = document.getElementById("avalonStyle")
 
+
+    function enter(dropper, event) {
+        var right = dropper.left + dropper.width
+        var bottom = dropper.top + dropper.height
+        if (event.pageX > dropper.left && event.pageX < right && event.pageY > dropper.top && event.pageY < bottom) {
+            return true
+        }
+    }
+
     function miniFx(elem, prop, from, to, opts) {
         var startTime = new Date
         var change = to - from
@@ -69,7 +78,7 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
             }
             return ret
         }
-        var top = 0, slideDown = false
+        var top = 0, left = 0, slideDown = false
 
         var model = avalon.define(data.gridId, function(vm) {
             vm.active = options.active;
@@ -77,13 +86,24 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
             vm.columns = makeColumns(options.columns)
             vm.viewportHeight = max * options.rowHeight
             vm.realHeight = total * options.rowHeight
+            vm.realWidth = options.columns.length * options.columnWidth
             vm.srollTop = 0
+            vm.scrollLeft = 0
             vm.min = 0
             vm.total = total
             vm.firstField = ""
             vm.headerHeight = options.headerHeight
             vm.resizeToggle = false
             vm.resizeLeft = 1
+            vm.getRealWidth = function(elem) {
+                var thead = elem && elem.nodeType == 1 ? elem : this, ret = 0
+                for (var i = 0, el; el = thead.childNodes[i++]; ) {
+                    if (el.nodeType === 1) {
+                        ret += el.offsetWidth
+                    }
+                }
+                model.realWidth = ret + 20//20留给滚动条
+            }
             vm.getCellWidth = function(name) {
                 for (var i = 0, el; el = vm.columns[i++]; ) {
                     if (el.field === name) {
@@ -162,19 +182,63 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                             var proxy = resizeTarget.parentNode["data-vm"]
                             proxy.width = proxy.width + e.pageX - resizeStart
                             resizeTarget = vm.resizeToggle = false
+                            var thead = document.getElementById(model.$id + "Thead")
+                            model.realWidth = model.getRealWidth(thead)
                             avalon.unbind(window, "mousemove", moveFn)
                             avalon.unbind(window, "mouseup", upFn)
                         }
                     })
-                }else{
-                    
+                } else {
+                    var curTH = e.target;
+                    do {
+                        if (curTH.className.indexOf("ui-grid-col") !== -1) {
+                            break
+                        }
+                    } while ((curTH = curTH.parentNode));
+                    var prev = curTH.previousSibling
+                    var next = curTH.nextSibling
+                    if (prev) {
+                        var offset = avalon(prev).offset()
+                        var prevBox = {
+                            left: offset.left,
+                            top: offset.top,
+                            width: prev.offsetWidth / 2,
+                            height: prev.offsetHeight / 2
+                        }
+                    }
+                    if (next) {
+                        var offset = avalon(next).offset()
+                        var nextBox = {
+                            left: offset.left,
+                            top: offset.top,
+                            width: prev.offsetWidth / 2,
+                            height: prev.offsetHeight / 2
+                        }
+                        nextBox.left += nextBox.width
+                        nextBox.top += nextBox.height
+                    }
+                    var resizeStart = e.pageX
+                    var flag = true
+                    var moveFn = avalon.bind(window, "mousemove", function(e) {
+                        e.preventDefault()
+                        if (flag) {
+                            curTH.style.left = (e.pageX - resizeStart) + "px"
+                        }
+                    })
+                    var upFn = avalon.bind(window, "mouseup", function(e) {
+                        e.preventDefault()
+                        if (flag) {
+                            flag = false
+                            avalon.unbind(window, "mousemove", moveFn)
+                            avalon.unbind(window, "mouseup", upFn)
+                        }
+                    })
                 }
             }
             vm.showSlider = function() {
                 if (!slideDown && !model.backboardToggle) {
                     slideDown = true
-                    var id = model.$id + "SlideDown"
-                    var target = document.getElementById(id)
+                    var target = document.getElementById(model.$id + "SlideDown")
                     target.style.display = "block"
                     miniFx(target, "height", 0, 22, 400)
                 }
@@ -182,8 +246,7 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
             vm.hideSlider = function() {
                 if (slideDown) {
                     slideDown = false
-                    var id = model.$id + "SlideDown"
-                    var target = document.getElementById(id)
+                    var target = document.getElementById(model.$id + "SlideDown")
                     miniFx(target, "height", 22, 0, {
                         duration: 400,
                         complete: function() {
@@ -232,18 +295,27 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                 })
             }
             vm.scroll = function(e) {
-                top = this.scrollTop
-                var min = Math.floor(top / options.rowHeight)
-                if (min + max <= total) {
-                    model.min = min
-                    var datas = avalon.mix(true, [], rawDatas.slice(min, min + max + 5))
-                    for (var i = 0, n = datas.length; i < n; i++) {
-                        vm.rows.set(i, datas[i])
+                var curTop = this.scrollTop
+                if (top !== curTop) {//如果是纵向滚动条
+                    top = curTop
+                    var min = Math.floor(top / options.rowHeight)
+                    if (min + max <= total) {
+                        model.min = min
+                        var datas = avalon.mix(true, [], rawDatas.slice(min, min + max + 5))
+                        for (var i = 0, n = datas.length; i < n; i++) {
+                            vm.rows.set(i, datas[i])
+                        }
+                        vm.srollTop = top
                     }
-                    vm.srollTop = top
+                }//如果是横向滚动条
+                var curLeft = this.scrollLeft
+                if (left !== curLeft) {
+                    left = curLeft
+                    model.scrollLeft = -1 * left
                 }
             }
         })
+        // model.realWidth = getRealWidth(model)+20
         //比要显示的行数多五个
         var datas = avalon.mix(true, [], rawDatas.slice(0, max + 5))
         model.rows = datas
