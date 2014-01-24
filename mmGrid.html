@@ -15,7 +15,6 @@
          ms-css-width="el.width" 
          ms-class="el.className" 
          ms-visible="el.toggle" 
-         ms-data-index="$index"
          ms-data-vm="el">
         {{el.text}}
         <button type="button" class="ui-helper-sorter" ms-if="el.sortable" lang="ru"  >▲</button>
@@ -26,7 +25,7 @@
     <a class="ui-helper-slide-up"  id="#VMID#SlideUp" ms-click="showTbody"></a>
     <a class="ui-helper-slide-down" ms-click="hideTbody" id="#VMID#SlideDown" ms-mouseleave="hideSlider">
     </a>
-    <div class="ui-grid-backboard" ms-visible="backboardToggle"  ms-css-height="viewportHeight" ms-css-top="srollTop">
+    <div class="ui-grid-backboard" ms-visible="backboardToggle"  ms-css-height="viewportHeight" >
         <h1>显示列</h1>
         <label ms-repeat="columns"><input type="checkbox" ms-disabled="el.lockDisplay"  ms-duplex-radio="el.toggle"><span>{{el.text}}</span></label>
     </div>
