@@ -275,7 +275,6 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                                 }
                             } else {
                                 if (nextBox && enter(nextBox, e)) {
-                                    console.log("111111111111")
                                     resizeStart = e.pageX
                                     var index = children.indexOf(curTH)
                                     var other = children.indexOf(next)
@@ -366,12 +365,12 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                     }
                 })
             }
-            vm.scroll = function(e) {
+            vm.renderTbody = function(e) {
                 var curTop = this.scrollTop
                 if (top !== curTop) {//如果是纵向滚动条
                     top = curTop
                     var min = Math.floor(top / options.rowHeight)
-                    if (min + max <= total) {
+                    if (min + max <= total) {//刷新tbody
                         model.min = min
                         var datas = avalon.mix(true, [], rawDatas.slice(min, min + max + 5))
                         for (var i = 0, n = datas.length; i < n; i++) {
@@ -380,7 +379,7 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                         vm.srollTop = top
                     }
                 }//如果是横向滚动条
-                var curLeft = this.scrollLeft
+                var curLeft = this.scrollLeft//移动表头
                 if (left !== curLeft) {
                     left = curLeft
                     model.scrollLeft = -1 * left
