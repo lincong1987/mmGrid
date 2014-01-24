@@ -41,11 +41,10 @@
                             },
                             {field: "department", text: "部门", sortable: true},
                             {field: "duration", text: "时长", sortable: true}
-                        ]
+                        ],
+                        columnsOrder: ["name", "birthday", "department","duration"]
                     }
-                    vm.order = function() {
-                        return ["name", "birthday", "department","duration"]
-                    }
+ 
                     vm.$skipArray = ["grid"]
                 })
                 avalon.scan()

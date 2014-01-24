@@ -12,6 +12,44 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
             return true
         }
     }
+    //=========================与调整列的位置相关的函数=====================
+    function getPrev(el) {
+        while (el = el.previousSibling) {
+            if (el.nodeType === 1) {
+                return el
+            }
+        }
+        return null
+    }
+    function getNext(el) {
+        while (el = el.nextSibling) {
+            if (el.nodeType === 1) {
+                return el
+            }
+        }
+        return null
+    }
+    function getPrevBox(el) {
+        var offset = avalon(el).offset()
+        return {
+            left: offset.left,
+            top: offset.top,
+            width: el.offsetWidth / 2,
+            height: el.offsetHeight / 2
+        }
+    }
+    function getNextBox(el) {
+        var offset = avalon(el).offset()
+        var nextBox = {
+            left: offset.left,
+            top: offset.top,
+            width: el.offsetWidth / 2,
+            height: el.offsetHeight / 2
+        }
+        nextBox.left += nextBox.width
+        nextBox.top += nextBox.height
+        return nextBox
+    }
 
     function miniFx(elem, prop, from, to, opts) {
         var startTime = new Date
@@ -89,6 +127,9 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
             vm.realWidth = options.columns.length * options.columnWidth
             vm.srollTop = 0
             vm.scrollLeft = 0
+            vm.getColumnsOrder = function(){
+                return vm.columnsOrder
+            }
             vm.min = 0
             vm.total = total
             vm.firstField = ""
@@ -195,34 +236,23 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                             break
                         }
                     } while ((curTH = curTH.parentNode));
-                    var prev = curTH.previousSibling
-                    var next = curTH.nextSibling
-                    if (prev) {
-                        var offset = avalon(prev).offset()
-                        var prevBox = {
-                            left: offset.left,
-                            top: offset.top,
-                            width: prev.offsetWidth / 2,
-                            height: prev.offsetHeight / 2
-                        }
-                    }
-                    if (next) {
-                        var offset = avalon(next).offset()
-                        var nextBox = {
-                            left: offset.left,
-                            top: offset.top,
-                            width: prev.offsetWidth / 2,
-                            height: prev.offsetHeight / 2
-                        }
-                        nextBox.left += nextBox.width
-                        nextBox.top += nextBox.height
-                    }
+
+                    var prev = getPrev(curTH)
+                    var next = getNext(curTH)
+                    var prevBox = prev && getPrevBox(prev)
+                    var nextBox = next && getNextBox(next)
+
                     var resizeStart = e.pageX
                     var flag = true
                     var moveFn = avalon.bind(window, "mousemove", function(e) {
                         e.preventDefault()
                         if (flag) {
                             curTH.style.left = (e.pageX - resizeStart) + "px"
+                            if (e.pageX - resizeStart < 0) {//向左移动
+                                if (prevBox && enter(prevBox, e)) {
+                                    prev.style.left = prev.offsetWidth +"px"
+                                }
+                            }
                         }
                     })
                     var upFn = avalon.bind(window, "mouseup", function(e) {
