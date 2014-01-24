@@ -13,17 +13,23 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
         }
     }
 //=========================与调整列的位置相关的函数=====================
-    function getPrev(el) {
-        while (el = el.previousSibling) {
-            if (el.nodeType === 1) {
+    function getPrev(array, el) {
+        var index = array.indexOf(el), i = 1
+        while (el) {
+            el = array[ index - i ]
+            i++
+            if (el && el.style.display != "none") {
                 return el
             }
         }
         return null
     }
-    function getNext(el) {
-        while (el = el.nextSibling) {
-            if (el.nodeType === 1) {
+    function getNext(array, el) {
+        var index = array.indexOf(el), i = 1
+        while (el) {
+            el = array[ index + i ]
+            i++
+            if (el && el.style.display != "none") {
                 return el
             }
         }
@@ -232,18 +238,22 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                     })
                 } else {
                     var curTH = e.target;
+
                     do {
                         if (curTH.className.indexOf("ui-grid-col") !== -1) {
                             break
                         }
                     } while ((curTH = curTH.parentNode));
-                    var prev = getPrev(curTH)
-                    var next = getNext(curTH)
+                    var parent = curTH.parentNode
+                    var children = avalon.slice(parent.children)
+                    var prev = getPrev(children, curTH)
+                    var next = getNext(children, curTH)
                     var prevBox = prev && getPrevBox(prev)
                     var nextBox = next && getNextBox(next)
                     curTH.style.zIndex = 10
                     var resizeStart = e.pageX
                     var flag = true
+                    var origin = model.columnsOrder.concat()
                     var moveFn = avalon.bind(window, "mousemove", function(e) {
                         e.preventDefault()
                         if (flag) {
@@ -251,34 +261,31 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                             if (e.pageX - resizeStart < 0) {//向左移动
                                 if (prevBox && enter(prevBox, e)) {
                                     resizeStart = e.pageX
-                                    var index = +curTH.getAttribute("data-index")
-                                    var pindex = +prev.getAttribute("data-index")
-                                    var el = model.columns.splice(pindex, 1)[0]
-                                    model.columns.splice(index, 0, el.$model)
-                                    curTH.style.left = "0px"
+                                    var index = children.indexOf(curTH)
+                                    var other = children.indexOf(prev)
+                                    parent.insertBefore(prev, curTH.nextSibling || null)
                                     var str = model.columnsOrder[index]
-                                    model.columnsOrder[index] = model.columnsOrder[pindex]
-                                    model.columnsOrder[pindex] = str
-                                    prev = getPrev(curTH)
-                                    next = getNext(curTH)
+                                    model.columnsOrder[index] = model.columnsOrder[other]
+                                    model.columnsOrder[other] = str
+                                    children = avalon.slice(parent.children)
+                                    prev = getPrev(children, curTH)
+                                    next = getNext(children, curTH)
                                     prevBox = prev && getPrevBox(prev)
                                     nextBox = next && getNextBox(next)
                                 }
                             } else {
                                 if (nextBox && enter(nextBox, e)) {
+                                    console.log("111111111111")
                                     resizeStart = e.pageX
-                                    var index = +curTH.getAttribute("data-index")
-                                    var nindex = +next.getAttribute("data-index")
-                                    var el = model.columns.splice(nindex, 1)[0]
-                                    model.columns.splice(index, 0, el.$model)
-                                    curTH.style.left = "0px"
-                                    curTH.getAttribute("data-index", nindex)
-                                    next.getAttribute("data-index", index)
+                                    var index = children.indexOf(curTH)
+                                    var other = children.indexOf(next)
+                                    parent.insertBefore(next, curTH || null)
                                     var str = model.columnsOrder[index]
-                                    model.columnsOrder[index] = model.columnsOrder[nindex]
-                                    model.columnsOrder[nindex] = str
-                                    prev = getPrev(curTH)
-                                    next = getNext(curTH)
+                                    model.columnsOrder[index] = model.columnsOrder[other]
+                                    model.columnsOrder[other] = str
+                                    children = avalon.slice(parent.children)
+                                    prev = getPrev(children, curTH)
+                                    next = getNext(children, curTH)
                                     prevBox = prev && getPrevBox(prev)
                                     nextBox = next && getNextBox(next)
                                 }
@@ -289,7 +296,11 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                         e.preventDefault()
                         if (flag) {
                             flag = false
-
+                            curTH.style.left = "0px"
+                            if (model.columnsOrder.join("") !== origin.join("")) {
+                                var datas = avalon.mix(true, [], rawDatas.slice(model.min, model.min + max + 5))
+                                model.rows = datas
+                            }
                             avalon.unbind(window, "mousemove", moveFn)
                             avalon.unbind(window, "mouseup", upFn)
                         }
