@@ -1,4 +1,3 @@
-
 <div class="ui-grid-thead" 
      ms-css-width="realWidth"
      ms-css-height="headerHeight" 
@@ -35,15 +34,15 @@
          ms-dblclick="editCell"
          ms-mouseenter="hideSlider"
          >
-        <div style="position:relative"ms-css-height="realHeight" ms-css-width="realWidth" ms-each-row="rows" >
-            <div class="ui-grid-tr ui-widget-content" 
+        <div style="position:relative"ms-css-height="realHeight" ms-css-width="realWidth"  >
+            <div class="ui-grid-tr ui-widget-content" ms-repeat-row="rows"
                  ms-hover="ui-state-hover"
                  ms-css-top="srollTop + $index * 25"
                  ms-class="even: (min + $index) % 2 === 0"  
+                 ms-with="row" data-with-sorted="getColumnsOrder" 
                  ms-class-1="odd: (min + $index) % 2 !== 0" 
                  ms-visible="min+$index < total"
                  ms-css-height="rowHeight" 
-                 ms-with="row" data-with-sorted="getColumnsOrder"  
                  >
                 <div ms-css-width="getCellWidth($key)" ms-visible="getCellToggle($key)" class="ui-grid-td" >
                     <div class="editable">{{$val}}</div><input ms-duplex="$val" style="display: none" ms-blur="uneditCell(min+$index, $key)">
