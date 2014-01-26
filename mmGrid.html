@@ -1,13 +1,15 @@
 <div class="ui-grid-thead" 
      ms-css-width="realWidth"
-     ms-css-height="headerHeight" 
      ms-click="theadChick" 
      ms-mousedown="theadDown"  
      ms-mouseenter="showSlider"
      ms-css-left="scrollLeft"
      id="#VMID#Thead"
      >
-    <div class="ui-grid-col"
+    <div ms-if="checkboxCol" class="ui-grid-col"  ms-css-height="headerHeight"  >
+        <input type="checkbox" ms-disabled="checkboxCol == 2" >
+    </div>
+    <div class="ui-grid-col ui-grid-field-col"
          ms-repeat="columns"
          data-repeat-rendered="getRealWidth"
          ms-css-height="headerHeight"  
@@ -15,6 +17,7 @@
          ms-class="el.className" 
          ms-visible="el.toggle" 
          ms-data-vm="el">
+
         {{el.text}}
         <button type="button" class="ui-helper-sorter" ms-if="el.sortable" lang="ru"  >▲</button>
         <div ms-if="!el.lockWidth" class="ui-helper-resizer" ></div>
@@ -39,12 +42,12 @@
                  ms-hover="ui-state-hover"
                  ms-css-top="srollTop + $index * 25"
                  ms-class="even: (min + $index) % 2 === 0"  
-                 ms-with="row" data-with-sorted="getColumnsOrder" 
                  ms-class-1="odd: (min + $index) % 2 !== 0" 
                  ms-visible="min+$index < total"
                  ms-css-height="rowHeight" 
+                 ms-with="row" data-with-sorted="getColumnsOrder"
                  >
-                <div ms-css-width="getCellWidth($key)" ms-visible="getCellToggle($key)" class="ui-grid-td" >
+                <div  ms-css-width="getCellWidth($key)" ms-visible="getCellToggle($key)" class="ui-grid-td" >
                     <div class="editable">{{$val}}</div><input ms-duplex="$val" style="display: none" ms-blur="uneditCell(min+$index, $key)">
                 </div>
             </div>

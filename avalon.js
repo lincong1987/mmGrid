@@ -5,7 +5,7 @@
  http://weibo.com/jslouvre/
  
  Released under the MIT license
- avalon 1.1 2014.1.24
+ avalon 1.1 2014.1.25
  ==================================================*/
 (function(DOC) {
     var Registry = {} //将函数曝光到此对象上，方便访问器收集依赖
@@ -1702,12 +1702,9 @@
         var firstBinding = bindings[0] || {}
         switch (firstBinding.type) {
             case "if":
-                bindingHandlers["if"](firstBinding, vmodels)
-                return
             case "repeat":
-                firstBinding.vmodels = vmodels
-                bindingHandlers["repeat"](firstBinding, vmodels)
-                return
+                executeBindings([firstBinding], vmodels)
+                break
             default:
                 executeBindings(bindings, vmodels)
                 if (!stopScan[elem.tagName] && rbind.test(elem.innerHTML)) {
@@ -2099,16 +2096,7 @@
     } catch (e) {
         avalon.contains = fixContains
     }
-    function shimController(data, transation, spans, proxy) {
-        var tview = data.template.cloneNode(true)
-        avalon.vmodels[proxy.$id] = proxy
-        var span = document.createElement("msloop")
-        span.setAttribute("ms-controller", proxy.$id)
-        span["msLoopData"] = data
-        span.appendChild(tview)
-        spans.push(span)
-        transation.appendChild(span)
-    }
+
     var bindingExecutors = avalon.bindingExecutors = {
         "attr": function(val, elem, data) {
             var method = data.type,
@@ -2313,13 +2301,15 @@
                                 break
                             }
                         }
+
                     } else {
                         while (parent.firstChild) {
                             deleteFragment.appendChild(parent.firstChild)
                         }
                     }
                     removeFromSanctuary(deleteFragment)
-                    proxies.length = 0
+                    if (proxies)
+                        proxies.length = 0
                     break
                 case "move":
                     var t = proxies.splice(pos, 1)[0]
@@ -2339,7 +2329,7 @@
                 case "append":
                     var pool = el
                     var transation = documentFragment.cloneNode(false)
-                    var callback = getBindingCallback(parent.getAttribute("data-with-ordered"), data.vmodels)
+                    var callback = getBindingCallback(parent.getAttribute("data-with-sorted"), data.vmodels)
                     var keys = []
                     var spans = []
                     for (var key in pos) {//得到所有键名
@@ -2358,7 +2348,7 @@
                             shimController(data, transation, spans, pool[key])
                         }
                     }
-                    parent.appendChild(transation) //再插到最后
+                    parent.insertBefore(transation, data.endRepeat || null) //再插到最后
                     for (var i = 0, el; el = spans[i++]; ) {
                         scanTag(el, data.vmodels)
                     }
@@ -2385,8 +2375,6 @@
                 } else {
                     fragment = avalon.parseHTML(val)
                 }
-
-
                 var replaceNodes = avalon.slice(fragment.childNodes)
                 elem.insertBefore(fragment, data.replaceNodes[0] || null) //fix IE6-8 insertBefore的第2个参数只能为节点或null
                 for (var i = 0, node; node = data.replaceNodes[i++]; ) {
@@ -2485,9 +2473,6 @@
             data.handlerName = "attr"//handleName用于处理多种绑定共用同一种bindingExecutor的情况
             parseExprProxy(text, vmodels, data, (simple ? null : scanExpr(data.value)))
         },
-        "bind": function() {
-            log("请改用$watch与ms-attr-id实现,详看https://github.com/RubyLouvre/avalon/issues/196")
-        },
         "checked": function(data, vmodels) {
             data.handlerName = "checked"
             parseExprProxy(data.value, vmodels, data)
@@ -2577,10 +2562,18 @@
             data.parent = elem
             data.handler = bindingExecutors.each
             data.callbackName = elem.getAttribute("data-" + (type || "each") + "-rendered")
-            var check0 = "$first",
-                    check1 = "$last"
-            if (type == "with") {
-                check0 = "$key", check1 = "$val"
+            var freturn = true
+            try {
+                list = data.getter()
+                if (rchecktype.test(getType(list))) {
+                    freturn = false
+                }
+            } catch (e) {
+            }
+            var check0 = "$key", check1 = "$val"
+            if (Array.isArray(list)) {
+                check0 = "$first"
+                check1 = "$last"
             }
             for (var i = 0, p; p = vmodels[i++]; ) {
                 if (p.hasOwnProperty(check0) && p.hasOwnProperty(check1)) {
@@ -2606,17 +2599,11 @@
                 }
             }
             data.template = template
-            try {
-                list = data.getter()
-                if (!rchecktype.test(getType(list))) {
-                    return
-                }
-            } catch (e) {
+            if (freturn) {
                 return
             }
-
             list[subscribers] && list[subscribers].push(data)
-            if (type === "with") {
+            if (!Array.isArray(list) && type !== "each") {
                 var pool = withProxyPool[list.$id]
                 if (!pool) {
                     withProxyCount++
@@ -2628,13 +2615,16 @@
                     }
                 }
                 data.rollback = function() {
+                    notifySubscribers(list, "clear")
+                    var endRepeat = this.endRepeat
                     var parent = this.parent
-                    var deleteFragment = documentFragment.cloneNode(false)
-                    while (parent.firstChild) {
-                        deleteFragment.appendChild(parent.firstChild)
+                    var element = this.template.firstChild
+                    parent.insertBefore(this.template, endRepeat || null)
+                    if (endRepeat) {
+                        parent.removeChild(endRepeat)
+                        parent.removeChild(this.startRepeat)
+                        this.element = element
                     }
-                    removeFromSanctuary(deleteFragment)
-                    parent.appendChild(this.template)
                 }
                 data.handler("append", list, pool)
             } else {
@@ -2669,9 +2659,6 @@
             data.hasArgs = four
             data.handlerName = "on"
             parseExprProxy(value, vmodels, data, four)
-        },
-        "ui": function() {
-            log("ms-ui已废弃，请使用更方便的ms-widget")
         },
         //控制元素显示或隐藏
         "visible": function(data, vmodels) {
@@ -3199,6 +3186,17 @@
                 callback.call(parent, method)
             }
         })
+    }
+    //为ms-each, ms-with, ms-repeat要循环的元素外包一个msloop临时节点，ms-controller的值为代理VM的$id
+    function shimController(data, transation, spans, proxy) {
+        var tview = data.template.cloneNode(true)
+        avalon.vmodels[proxy.$id] = proxy
+        var span = DOC.createElement("msloop")
+        span.setAttribute("ms-controller", proxy.$id)
+        span["msLoopData"] = data
+        span.appendChild(tview)
+        spans.push(span)
+        transation.appendChild(span)
     }
     // 取得用于定位的节点。在绑定了ms-each, ms-with属性的元素里，它的整个innerHTML都会视为一个子模板先行移出DOM树，
     // 然后如果它的元素有多少个（ms-each）或键值对有多少双（ms-with），就将它复制多少份(多少为N)，再经过扫描后，重新插入该元素中。

@@ -143,6 +143,7 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
             vm.headerHeight = options.headerHeight
             vm.resizeToggle = false
             vm.resizeLeft = 1
+            vm.checkboxCol = 1
             vm.getRealWidth = function(elem) {
                 var thead = elem && elem.nodeType == 1 ? elem : this, ret = 0
                 for (var i = 0, el; el = thead.childNodes[i++]; ) {
@@ -243,7 +244,9 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                         }
                     } while ((curTH = curTH.parentNode));
                     var parent = curTH.parentNode
-                    var children = avalon.slice(parent.children)
+                    var children = avalon.slice(parent.children).filter(function(el){
+                        return el.className.indexOf("ui-grid-field-col") > -1
+                    })
                     var prev = getPrev(children, curTH)
                     var next = getNext(children, curTH)
                     var prevBox = prev && getPrevBox(prev)
@@ -257,7 +260,7 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                         var str = model.columnsOrder[index]
                         model.columnsOrder[index] = model.columnsOrder[other]
                         model.columnsOrder[other] = str
-                        children = avalon.slice(parent.children)
+                      //  children = avalon.slice(parent.children)
                         prev = getPrev(children, curTH)
                         next = getNext(children, curTH)
                         prevBox = prev && getPrevBox(prev)
