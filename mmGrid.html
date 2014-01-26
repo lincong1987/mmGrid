@@ -45,9 +45,11 @@
                  ms-class-1="odd: (min + $index) % 2 !== 0" 
                  ms-visible="min+$index < total"
                  ms-css-height="rowHeight" 
-                 ms-with="row" data-with-sorted="getColumnsOrder"
                  >
-                <div  ms-css-width="getCellWidth($key)" ms-visible="getCellToggle($key)" class="ui-grid-td" >
+                <div class="ui-grid-td" >
+                    <input type="checkbox"/>
+                </div>
+                <div  ms-repeat="row" data-with-sorted="getColumnsOrder" ms-css-width="getCellWidth($key)" ms-visible="getCellToggle($key)" class="ui-grid-td" >
                     <div class="editable">{{$val}}</div><input ms-duplex="$val" style="display: none" ms-blur="uneditCell(min+$index, $key)">
                 </div>
             </div>
