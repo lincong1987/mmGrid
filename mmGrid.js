@@ -123,6 +123,22 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
         }
         var top = 0, left = 0, slideDown = false
 
+        var checkCol = options.checkCol
+        var defaultCheckCol = widget.defaults.checkCol
+        switch (avalon.type(checkCol)) {
+            case "number":
+                checkCol = avalon.mix(true, defaultCheckCol, {
+                    type: checkCol
+                })
+                break;
+            case "object":
+                checkCol = avalon.mix(true, defaultCheckCol, checkCol)
+                break;
+            default:
+                checkCol = avalon.mix(true, {}, defaultCheckCol)
+                break;
+        }
+console.log(checkCol)
         var model = avalon.define(data.gridId, function(vm) {
             vm.active = options.active;
             vm.rows = []
@@ -143,7 +159,7 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
             vm.headerHeight = options.headerHeight
             vm.resizeToggle = false
             vm.resizeLeft = 1
-            vm.checkboxCol = 1
+            vm.checkCol = checkCol
             vm.getRealWidth = function(elem) {
                 var thead = elem && elem.nodeType == 1 ? elem : this, ret = 0
                 for (var i = 0, el; el = thead.childNodes[i++]; ) {
@@ -244,7 +260,7 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                         }
                     } while ((curTH = curTH.parentNode));
                     var parent = curTH.parentNode
-                    var children = avalon.slice(parent.children).filter(function(el){
+                    var children = avalon.slice(parent.children).filter(function(el) {
                         return el.className.indexOf("ui-grid-field-col") > -1
                     })
                     var prev = getPrev(children, curTH)
@@ -260,7 +276,7 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                         var str = model.columnsOrder[index]
                         model.columnsOrder[index] = model.columnsOrder[other]
                         model.columnsOrder[other] = str
-                      //  children = avalon.slice(parent.children)
+                        //  children = avalon.slice(parent.children)
                         prev = getPrev(children, curTH)
                         next = getNext(children, curTH)
                         prevBox = prev && getPrevBox(prev)
@@ -386,6 +402,7 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
         //比要显示的行数多五个
         var datas = avalon.mix(true, [], rawDatas.slice(0, max + 5))
         model.rows = datas
+        console.log(model.checkCol)
         avalon.nextTick(function() {
             element.innerHTML = html.replace(/#VMID#/g, model.$id)
             avalon.scan(element, [model].concat(vmodels))
@@ -398,6 +415,10 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
         columnWidth: 160,
         getColumnTitle: function() {
             return ""
+        },
+        checkCol: {
+            type: 0,
+            columnWidth: 40
         }
     }
     return avalon

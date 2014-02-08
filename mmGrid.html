@@ -6,8 +6,8 @@
      ms-css-left="scrollLeft"
      id="#VMID#Thead"
      >
-    <div ms-if="checkboxCol" class="ui-grid-col"  ms-css-height="headerHeight"  >
-        <input type="checkbox" ms-disabled="checkboxCol == 2" >
+    <div ms-if="checkCol.type" class="ui-grid-col"  ms-css-height="headerHeight"  ms-css-width="checkCol.columnWidth"  >
+        <input type="checkbox" class="ui-grid-checkbox" ms-disabled="checkCol.type == 2" >
     </div>
     <div class="ui-grid-col ui-grid-field-col"
          ms-repeat="columns"
@@ -17,7 +17,6 @@
          ms-class="el.className" 
          ms-visible="el.toggle" 
          ms-data-vm="el">
-
         {{el.text}}
         <button type="button" class="ui-helper-sorter" ms-if="el.sortable" lang="ru"  >▲</button>
         <div ms-if="!el.lockWidth" class="ui-helper-resizer" ></div>
@@ -46,11 +45,11 @@
                  ms-visible="min+$index < total"
                  ms-css-height="rowHeight" 
                  >
-                <div class="ui-grid-td" >
-                    <input type="checkbox"/>
+                <div class="ui-grid-td" ms-if="checkCol.type" ms-css-width="checkCol.columnWidth">
+                    <input type="checkbox" class="ui-grid-checkbox"/>
                 </div>
                 <div  ms-repeat="row" data-with-sorted="getColumnsOrder" ms-css-width="getCellWidth($key)" ms-visible="getCellToggle($key)" class="ui-grid-td" >
-                    <div class="editable">{{$val}}</div><input ms-duplex="$val" style="display: none" ms-blur="uneditCell(min+$index, $key)">
+                    <div class="editable">{{$val}}</div><input class="ui-grid-textbox" ms-duplex="$val" style="display: none" ms-blur="uneditCell(min+$index, $key)">
                 </div>
             </div>
         </div>
@@ -244,9 +243,13 @@
     .ui-grid-tr.even .ui-grid-td{
         background: #e1eff8;
     }
-    .ui-grid-td input{
+    .ui-grid-td .ui-grid-textbox{
         width:100%;
-        height:95%;
+        height: 95%;
+    }
+    input.ui-grid-checkbox{
+        width:100%;
+        vertical-align: middle;
     }
     .ui-helper-unselect{
         -webkit-touch-callout: none;
