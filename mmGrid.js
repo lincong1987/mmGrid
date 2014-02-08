@@ -138,7 +138,7 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                 checkCol = avalon.mix(true, {}, defaultCheckCol)
                 break;
         }
-console.log(checkCol)
+
         var model = avalon.define(data.gridId, function(vm) {
             vm.active = options.active;
             vm.rows = []
@@ -150,6 +150,7 @@ console.log(checkCol)
             vm.srollTop = 0
             vm.scrollLeft = 0
             vm.getColumnsOrder = function() {
+                console.log(options.columnsOrder)
                 return vm.columnsOrder
             }
 
@@ -160,6 +161,7 @@ console.log(checkCol)
             vm.resizeToggle = false
             vm.resizeLeft = 1
             vm.checkCol = checkCol
+            vm.rowHeight = options.rowHeight
             vm.getRealWidth = function(elem) {
                 var thead = elem && elem.nodeType == 1 ? elem : this, ret = 0
                 for (var i = 0, el; el = thead.childNodes[i++]; ) {
@@ -402,7 +404,7 @@ console.log(checkCol)
         //比要显示的行数多五个
         var datas = avalon.mix(true, [], rawDatas.slice(0, max + 5))
         model.rows = datas
-        console.log(model.checkCol)
+
         avalon.nextTick(function() {
             element.innerHTML = html.replace(/#VMID#/g, model.$id)
             avalon.scan(element, [model].concat(vmodels))
