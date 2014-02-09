@@ -140,7 +140,13 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
         }
         if (checkCol.field) {
             var replacement = options.checkColHTML
-            replacement = replacement.replace("FIELD", checkCol.field).replace("NAME", (checkCol.name || "avalon" + (new Date - 0)))
+            replacement = replacement.replace("NAME", (checkCol.name || "avalon" + (new Date - 0)))
+            if (checkCol.type == 2) {
+                replacement = replacement.replace("FIELD", checkCol.field)
+            } else {
+                replacement = replacement.replace("row.FIELD", "min+$index === selectedIndex")
+            }
+
         } else {
             replacement = ""
         }
@@ -177,6 +183,7 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
             vm.getColumnsOrder = function() {
                 return vm.columnsOrder
             }
+            vm.selectedIndex = NaN
             vm.checkAll = function() {
                 var field = checkCol.field, checked = this.checked
                 rawDatas.forEach(function(el) {
@@ -187,7 +194,11 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                 })
             }
             vm.checkOne = function(index) {
-                rawDatas[index][ checkCol.field ] = this.checked
+                if (model.checkCol.type == 2) {
+                    rawDatas[index][ checkCol.field ] = this.checked
+                } else {
+                    model.selectedIndex = index
+                }
             }
             vm.min = 0
             vm.total = total
@@ -461,7 +472,7 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
             columnWidth: 40
         },
         checkColHTML: '<div class="ui-grid-td"  ms-css-width="checkCol.columnWidth">' +
-                '   <input type="checkbox" class="ui-grid-checkbox" name="NAME" ms-duplex-radio="row.FIELD" ms-click="checkOne(min+$index)" /></div>',
+                '   <input type="checkbox" class="ui-grid-checkbox" name="NAME" ms-checked="row.FIELD" ms-click="checkOne(min+$index)" /></div>',
         indexColHTML: '<div class="ui-grid-td"  ms-css-width="indexCol.columnWidth">{{min+$index}}</div>',
         indexCol: {
             type: 0,
