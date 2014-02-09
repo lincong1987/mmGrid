@@ -122,7 +122,7 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
             return ret
         }
         var top = 0, left = 0, slideDown = false
-
+        //处理勾选栏
         var checkCol = options.checkCol
         var defaultCheckCol = widget.defaults.checkCol
         switch (avalon.type(checkCol)) {
@@ -139,15 +139,13 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                 break;
         }
         if (checkCol.field) {
-            var replacement = '<div class="ui-grid-td"  ms-css-width="checkCol.columnWidth">' +
-                    '   <input type="checkbox" class="ui-grid-checkbox" name="NAME" ms-duplex-radio="row.FIELD" ms-click="asyncCheck(min+$index,\'FIELD\')" />' +
-                    '</div>'
+            var replacement = options.checkColHTML
             replacement = replacement.replace(/FIELD/g, checkCol.field).replace("NAME", (checkCol.name || "avalon" + (new Date - 0)))
         } else {
             replacement = ""
         }
-        html = html.replace("<!--checkCol-->", replacement)
-
+        html = html.replace("<!--checkColHTML-->", replacement)
+        //处理索引栏
         var indexCol = options.indexCol
         var defaultIndexCol = widget.defaults.indexCol
         switch (avalon.type(indexCol)) {
@@ -163,6 +161,8 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                 indexCol = avalon.mix(true, {}, defaultIndexCol)
                 break;
         }
+        replacement = indexCol.type ? options.indexColHTML : ""
+        html = html.replace("<!--indexColHTML-->", replacement)
 
         var model = avalon.define(data.gridId, function(vm) {
             vm.active = options.active;
@@ -177,9 +177,8 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
             vm.getColumnsOrder = function() {
                 return vm.columnsOrder
             }
-            vm.asyncCheck = function( index, field){
-                console.log(field)
-               rawDatas[index][field] = this.checked
+            vm.asyncCheck = function(index, field) {
+                rawDatas[index][field] = this.checked
             }
             vm.min = 0
             vm.total = total
@@ -451,6 +450,9 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
             type: 0,
             columnWidth: 40
         },
+        checkColHTML: '<div class="ui-grid-td"  ms-css-width="checkCol.columnWidth">' +
+                '   <input type="checkbox" class="ui-grid-checkbox" name="NAME" ms-duplex-radio="row.FIELD" ms-click="asyncCheck(min+$index,\'FIELD\')" /></div>',
+        indexColHTML: '<div class="ui-grid-td" ms-if="indexCol.type" ms-css-width="indexCol.columnWidth">{{min+$index}}</div>',
         indexCol: {
             type: 0,
             columnWidth: 30
