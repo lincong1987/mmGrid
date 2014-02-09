@@ -15,6 +15,8 @@ mmGrid
 <li>双击即时编辑某一单元格 ok </li>
 <li>班马线 ok </li>
 <li>掠过变色 ok </li>
+<li>checkbox栏 全选与非全选 ok </li>
+<li>索引栏 ok </li>
 <li>过滤功能</li>
 <li>分页功能</li>
 </ul>

@@ -144,7 +144,7 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
             if (checkCol.type == 2) {
                 replacement = replacement.replace("FIELD", checkCol.field)
             } else {
-                replacement = replacement.replace("row.FIELD", "min+$index === selectedIndex")
+                replacement = replacement.replace("row.FIELD", "min+$index === checkedIndex")
             }
 
         } else {
@@ -183,7 +183,7 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
             vm.getColumnsOrder = function() {
                 return vm.columnsOrder
             }
-            vm.selectedIndex = NaN
+            vm.checkedIndex = NaN
             vm.checkAll = function() {
                 var field = checkCol.field, checked = this.checked
                 rawDatas.forEach(function(el) {
@@ -197,7 +197,7 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                 if (model.checkCol.type == 2) {
                     rawDatas[index][ checkCol.field ] = this.checked
                 } else {
-                    model.selectedIndex = index
+                    model.checkedIndex = index
                 }
             }
             vm.min = 0
