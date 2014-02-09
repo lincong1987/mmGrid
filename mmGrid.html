@@ -48,10 +48,8 @@
                  ms-visible="min+$index < total"
                  ms-css-height="rowHeight" 
                  >
-                <div class="ui-grid-td" ms-if="checkCol.type" ms-css-width="checkCol.columnWidth">
-                    <input type="checkbox" class="ui-grid-checkbox" #duplex# />
-                </div>
-                 <div class="ui-grid-td" ms-if="indexCol.type" ms-css-width="indexCol.columnWidth">
+                <!--checkCol-->
+                <div class="ui-grid-td" ms-if="indexCol.type" ms-css-width="indexCol.columnWidth">
                     {{min+$index}}
                 </div>
                 <div  ms-repeat="row" data-with-sorted="getColumnsOrder" ms-css-width="getCellWidth($key)" ms-visible="getCellToggle($key)" class="ui-grid-td" >

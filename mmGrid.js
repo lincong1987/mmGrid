@@ -90,9 +90,9 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
     }
 
     var widget = avalon.ui.grid = function(element, data, vmodels) {
-        var $element = avalon(element), options = data.gridOptions, tabs = [],
+        var $element = avalon(element), options = data.gridOptions,
                 model, el
-        var fragment = document.createDocumentFragment()
+
 
         $element.addClass(" ui-grid ui-widget ui-helper-reset")
         var rawDatas = options.rows
@@ -139,11 +139,14 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                 break;
         }
         if (checkCol.field) {
-            var replacement = "ms-duplex='row." + checkCol.field + "' name='" + (checkCol.name || "avalon" + (new Date-0)) + "'"
+            var replacement = '<div class="ui-grid-td"  ms-css-width="checkCol.columnWidth">' +
+                    '   <input type="checkbox" class="ui-grid-checkbox" name="NAME" ms-duplex-radio="row.FIELD" ms-click="asyncCheck(min+$index,\'FIELD\')" />' +
+                    '</div>'
+            replacement = replacement.replace(/FIELD/g, checkCol.field).replace("NAME", (checkCol.name || "avalon" + (new Date - 0)))
         } else {
             replacement = ""
         }
-        html = html.replace("#duplex#", replacement)
+        html = html.replace("<!--checkCol-->", replacement)
 
         var indexCol = options.indexCol
         var defaultIndexCol = widget.defaults.indexCol
@@ -172,13 +175,15 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
             vm.srollTop = 0
             vm.scrollLeft = 0
             vm.getColumnsOrder = function() {
-                console.log(options.columnsOrder)
                 return vm.columnsOrder
             }
-
+            vm.asyncCheck = function( index, field){
+                console.log(field)
+               rawDatas[index][field] = this.checked
+            }
             vm.min = 0
             vm.total = total
-            vm.$skipArray = ["columnsOrder"]
+            vm.$skipArray = ["columnsOrder", "indexCol"]
             vm.headerHeight = options.headerHeight
             vm.resizeToggle = false
             vm.resizeLeft = 1
@@ -426,6 +431,7 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
         // model.realWidth = getRealWidth(model)+20
         //比要显示的行数多五个
         var datas = avalon.mix(true, [], rawDatas.slice(0, max + 5))
+
         model.rows = datas
 
         avalon.nextTick(function() {
