@@ -9,6 +9,9 @@
     <div ms-if="checkCol.type" class="ui-grid-col"  ms-css-height="headerHeight"  ms-css-width="checkCol.columnWidth"  >
         <input type="checkbox" class="ui-grid-checkbox" ms-disabled="checkCol.type == 2" >
     </div>
+    <div ms-if="indexCol.type" class="ui-grid-col"  ms-css-height="headerHeight"  ms-css-width="indexCol.columnWidth"  >
+
+    </div>
     <div class="ui-grid-col ui-grid-field-col"
          ms-repeat="columns"
          data-repeat-rendered="getRealWidth"
@@ -46,7 +49,10 @@
                  ms-css-height="rowHeight" 
                  >
                 <div class="ui-grid-td" ms-if="checkCol.type" ms-css-width="checkCol.columnWidth">
-                    <input type="checkbox" class="ui-grid-checkbox" ms-duplex="row.toggle"/>
+                    <input type="checkbox" class="ui-grid-checkbox" #duplex# />
+                </div>
+                 <div class="ui-grid-td" ms-if="indexCol.type" ms-css-width="indexCol.columnWidth">
+                    {{min+$index}}
                 </div>
                 <div  ms-repeat="row" data-with-sorted="getColumnsOrder" ms-css-width="getCellWidth($key)" ms-visible="getCellToggle($key)" class="ui-grid-td" >
                     <div class="editable">{{$val}}</div><input class="ui-grid-textbox" ms-duplex="$val" style="display: none" ms-blur="uneditCell(min+$index, $key)">
@@ -57,7 +63,7 @@
 
 </div>
 <div class="ui-grid-resizer" ms-visible="resizeToggle" ms-css-left="resizeLeft"></div>
-<style scoped>
+<style>
     .ui-grid-resizer{
         display: none;
         border:1px dashed #ccc;

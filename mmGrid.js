@@ -138,6 +138,28 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                 checkCol = avalon.mix(true, {}, defaultCheckCol)
                 break;
         }
+        if (checkCol.field) {
+            var replacement = "ms-duplex='row." + checkCol.field + "' name='" + (checkCol.name || "avalon" + (new Date-0)) + "'"
+        } else {
+            replacement = ""
+        }
+        html = html.replace("#duplex#", replacement)
+
+        var indexCol = options.indexCol
+        var defaultIndexCol = widget.defaults.indexCol
+        switch (avalon.type(indexCol)) {
+            case "number":
+                indexCol = avalon.mix(true, defaultIndexCol, {
+                    type: indexCol
+                })
+                break;
+            case "object":
+                indexCol = avalon.mix(true, defaultIndexCol, indexCol)
+                break;
+            default:
+                indexCol = avalon.mix(true, {}, defaultIndexCol)
+                break;
+        }
 
         var model = avalon.define(data.gridId, function(vm) {
             vm.active = options.active;
@@ -161,6 +183,7 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
             vm.resizeToggle = false
             vm.resizeLeft = 1
             vm.checkCol = checkCol
+            vm.indexCol = indexCol
             vm.rowHeight = options.rowHeight
             vm.getRealWidth = function(elem) {
                 var thead = elem && elem.nodeType == 1 ? elem : this, ret = 0
@@ -421,6 +444,10 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
         checkCol: {
             type: 0,
             columnWidth: 40
+        },
+        indexCol: {
+            type: 0,
+            columnWidth: 30
         }
     }
     return avalon

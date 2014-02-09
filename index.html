@@ -26,7 +26,8 @@
                             birthday: new Date - i,
                             name: str(),
                             department: str(),
-                            duration: new Date - i
+                            duration: new Date - i,
+                            checked: false
                         }
                     }
                     return ret
@@ -41,7 +42,11 @@
                             {field: "department", text: "部门", sortable: true},
                             {field: "duration", text: "时长", sortable: true}
                         ],
-                        checkCol: 1,
+                        checkCol: {
+                            type: 1,
+                            field: "checked"
+                        },
+                        indexCol: 1,
                         columnsOrder: ["name", "birthday", "department", "duration"]
                     }
 
