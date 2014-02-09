@@ -138,7 +138,9 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                 checkCol = avalon.mix(true, {}, defaultCheckCol)
                 break;
         }
-        if (checkCol.field) {
+        if (checkCol.type) {
+            if(!checkCol.field)
+                throw Error("必须指定要关联的属性名")
             var replacement = options.checkColHTML
             replacement = replacement.replace("NAME", (checkCol.name || "avalon" + (new Date - 0)))
             if (checkCol.type == 2) {
@@ -146,7 +148,6 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
             } else {
                 replacement = replacement.replace("row.FIELD", "min+$index === checkedIndex")
             }
-
         } else {
             replacement = ""
         }
