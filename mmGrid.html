@@ -46,11 +46,11 @@
                  ms-css-height="rowHeight" 
                  >
                 <div class="ui-grid-td" ms-if="checkCol.type" ms-css-width="checkCol.columnWidth">
-                    <input type="checkbox" class="ui-grid-checkbox"/>
+                    <input type="checkbox" class="ui-grid-checkbox" ms-duplex="row.toggle"/>
                 </div>
                 <div  ms-repeat="row" data-with-sorted="getColumnsOrder" ms-css-width="getCellWidth($key)" ms-visible="getCellToggle($key)" class="ui-grid-td" >
                     <div class="editable">{{$val}}</div><input class="ui-grid-textbox" ms-duplex="$val" style="display: none" ms-blur="uneditCell(min+$index, $key)">
-                </div>
+                </div 
             </div>
         </div>
     </div>
