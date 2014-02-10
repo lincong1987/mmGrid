@@ -1,17 +1,5 @@
 define(["avalon", "text!mmGrid.html"], function(avalon, html) {
 
-    var useTransition = window.TransitionEvent || window.WebKitTransitionEvent
-
-    var styleEl = document.getElementById("avalonStyle")
-
-
-    function enter(dropper, event) {
-        var right = dropper.left + dropper.width
-        var bottom = dropper.top + dropper.height
-        if (event.pageX > dropper.left && event.pageX < right && event.pageY > dropper.top && event.pageY < bottom) {
-            return true
-        }
-    }
 //=========================与调整列的位置相关的函数=====================
     function getPrev(array, el) {
         var index = array.indexOf(el), i = 1
@@ -55,7 +43,14 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
         nextBox.left += nextBox.width
         return nextBox
     }
-
+    function enter(dropper, event) {
+        var right = dropper.left + dropper.width
+        var bottom = dropper.top + dropper.height
+        if (event.pageX > dropper.left && event.pageX < right && event.pageY > dropper.top && event.pageY < bottom) {
+            return true
+        }
+    }
+    //==========================一个迷你的动画函数=================================
     function miniFx(elem, prop, from, to, opts) {
         var startTime = new Date
         var change = to - from
@@ -92,8 +87,6 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
     var widget = avalon.ui.grid = function(element, data, vmodels) {
         var $element = avalon(element), options = data.gridOptions,
                 model, el
-
-
         $element.addClass(" ui-grid ui-widget ui-helper-reset")
         var rawDatas = options.rows
         var max = Math.min(rawDatas.length, options.maxRows)
@@ -139,14 +132,14 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                 break;
         }
         if (checkCol.type) {
-            if(!checkCol.field)
+            if (!checkCol.field)
                 throw Error("必须指定要关联的属性名")
             var replacement = options.checkColHTML
             replacement = replacement.replace("NAME", (checkCol.name || "avalon" + (new Date - 0)))
             if (checkCol.type == 2) {
                 replacement = replacement.replace("FIELD", checkCol.field)
             } else {
-                replacement = replacement.replace("row.FIELD", "min+$index === checkedIndex")
+                replacement = replacement.replace("row.FIELD", "startIndex+$index === checkedIndex")
             }
         } else {
             replacement = ""
@@ -172,19 +165,48 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
         html = html.replace("<!--indexColHTML-->", replacement)
 
         var model = avalon.define(data.gridId, function(vm) {
-            vm.active = options.active;
+
+            //非监控属性，用于提高性能
+            vm.$skipArray = ["columnsOrder", "indexCol"]
+            //出现在可视区中的行
             vm.rows = []
+            //表头各列的顺序（除去checkCol与indexCol）
             vm.columnsOrder = options.columnsOrder
+            //生成表头的配置
             vm.columns = makeColumns(options.columns)
+            //可视区的高度（用于制造纵向滚动条）
             vm.viewportHeight = max * options.rowHeight
+            //可视区被裁剪掉的DIV的真实高度
             vm.realHeight = total * options.rowHeight
+            //可视区被裁剪掉的DIV的真实高度
             vm.realWidth = options.columns.length * options.columnWidth
+            //纵向滚动条距滚动面板的顶部的距离（滚动面板可理解为可视区）
             vm.srollTop = 0
+            //横向滚动条距滚动面板的左侧的距离（滚动面板可理解为可视区）
             vm.scrollLeft = 0
+            //data-with-sorted的回调
             vm.getColumnsOrder = function() {
                 return vm.columnsOrder
             }
+            //当前可视区显示的第一个item
+            vm.startIndex = 0
+            //总item数
+            vm.total = total
+            //表头的格子的高
+            vm.headerHeight = options.headerHeight
+            //可视区的格子的高
+            vm.rowHeight = options.rowHeight
+            //用于控制 表头列排序时出现的虚线 的显隐
+            vm.resizeToggle = false
+            //用于控制 被可视区遮住的那个backboard面板（它用于配置各列的显示隐藏） 的显隐
+            vm.backboardToggle = false
+            // 表头列排序时出现的虚线 距离GRID最左侧的距离 
+            vm.resizeLeft = 1
+            //checkCol的配置
+            vm.checkCol = checkCol
+            //checkCol在单选情况下，被选中的那个索引值
             vm.checkedIndex = NaN
+            //checkCol在复选情况下，位于表头用于全选/非全选的checkbox的点击事件回调
             vm.checkAll = function() {
                 var field = checkCol.field, checked = this.checked
                 rawDatas.forEach(function(el) {
@@ -194,6 +216,7 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                     el[field] = checked
                 })
             }
+            //checkCol在可用情况下，位于可视区的checkbox的点击事件回调
             vm.checkOne = function(index) {
                 if (model.checkCol.type == 2) {
                     rawDatas[index][ checkCol.field ] = this.checked
@@ -201,15 +224,9 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                     model.checkedIndex = index
                 }
             }
-            vm.min = 0
-            vm.total = total
-            vm.$skipArray = ["columnsOrder", "indexCol"]
-            vm.headerHeight = options.headerHeight
-            vm.resizeToggle = false
-            vm.resizeLeft = 1
-            vm.checkCol = checkCol
+            //indexCol的配置
             vm.indexCol = indexCol
-            vm.rowHeight = options.rowHeight
+            //获得表头的真实宽度（用于制造纵向滚动条）
             vm.getRealWidth = function(elem) {
                 var thead = elem && elem.nodeType == 1 ? elem : this, ret = 0
                 for (var i = 0, el; el = thead.childNodes[i++]; ) {
@@ -217,8 +234,9 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                         ret += el.offsetWidth
                     }
                 }
-                model.realWidth = ret + 20//20留给滚动条
+                model.realWidth = ret + 17//17留给滚动条
             }
+            //得到可视区某一个格子的宽
             vm.getCellWidth = function(name) {
                 for (var i = 0, el; el = vm.columns[i++]; ) {
                     if (el.field === name) {
@@ -226,6 +244,7 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                     }
                 }
             }
+            //得到可视区某一个格子的显示隐藏情况
             vm.getCellToggle = function(name) {
                 for (var i = 0, el; el = vm.columns[i++]; ) {
                     if (el.field === name) {
@@ -233,9 +252,8 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                     }
                 }
             }
-
-            vm.backboardToggle = false
-            vm.editCell = function(e) {//即时编辑某个单元格，事件代理
+            //双击可视区某一个格子，可即时编辑此单元格（它是使用事件代理，绑定在#VMID#Tbody上）
+            vm.editCell = function(e) {
                 var target = e.target
                 if (target.className.indexOf("editable") !== -1) {
                     target.style.display = "none"
@@ -251,15 +269,21 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                     }
                 }
             }
-            vm.uneditCell = function(index, name) {//还原为文本状态
-                var obj = rawDatas[index]
-                if (obj) {
-                    obj[name] = this.value
+            //失去焦点或回车时，还原为文本状态
+            vm.uneditCell = function(e) {
+                if (e.type === "blur" || (e.type === "keypress" && e.which == 13)) {
+                    var index = avalon(this).data("index")
+                    var name = avalon(this).data("key")
+                    var obj = rawDatas[index]
+                    if (obj) {
+                        obj[name] = this.value
+                    }
+                    this.style.display = "none"
+                    this.previousSibling.style.display = "block"
                 }
-                this.style.display = "none"
-                this.previousSibling.style.display = "block"
             }
-            vm.theadChick = function(e) {//对某一列进行排序，使用事件代理
+            //对某一列的所有行进行排序，使用事件代理
+            vm.theadChick = function(e) {
                 var target = e.target
                 if (target.className.indexOf("ui-helper-sorter") !== -1) {
                     e.preventDefault()
@@ -270,14 +294,15 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                         var ret = a[field] - b[field]
                         return ret * (trend ? 1 : -1)
                     })
-                    var models = vm.rows.$model, j = vm.min
+                    var models = vm.rows.$model, j = vm.startIndex
                     for (var i = 0, el; el = models[i]; i++) {//同步原始数组
                         rawDatas[j + i] = el
                     }
                     target.innerHTML = trend ? "▼" : "▲"
                 }
             }
-            vm.theadDown = function(e) {//实现表头拖动列宽，使用事件代理
+            //实现表头拖动列宽，使用事件代理
+            vm.theadDown = function(e) {
                 var curTH = e.target;
                 if (curTH.className.indexOf("ui-helper-resizer") !== -1) {
                     e.preventDefault()
@@ -327,7 +352,6 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                         var str = model.columnsOrder[index]
                         model.columnsOrder[index] = model.columnsOrder[other]
                         model.columnsOrder[other] = str
-                        //  children = avalon.slice(parent.children)
                         prev = getPrev(children, curTH)
                         next = getNext(children, curTH)
                         prevBox = prev && getPrevBox(prev)
@@ -360,7 +384,7 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                             flag = false
                             curTH.style.left = "0px"
                             if (model.columnsOrder.join("") !== origin.join("")) {
-                                var datas = avalon.mix(true, [], rawDatas.slice(model.min, model.min + max + 5))
+                                var datas = avalon.mix(true, [], rawDatas.slice(model.startIndex, model.startIndex + max + 5))
                                 model.rows = datas
                             }
                             avalon.unbind(window, "mousemove", moveFn)
@@ -369,6 +393,7 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                     })
                 }
             }
+            //显示下拉菜单，用于向下收起tbody,露出backboard面板
             vm.showSlider = function() {
                 if (!slideDown && !model.backboardToggle) {
                     slideDown = true
@@ -377,6 +402,7 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                     miniFx(target, "height", 0, 22, 400)
                 }
             }
+            //收起下拉菜单
             vm.hideSlider = function() {
                 if (slideDown) {
                     slideDown = false
@@ -389,12 +415,12 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                     })
                 }
             }
+            //以动画方式从下到上滑出tbody
             vm.showTbody = function(e) {
                 var target = e.target
                 var id = model.$id + "Tbody"
                 var tbody = document.getElementById(id)
                 var height = tbody.parentNode.offsetHeight
-                // tbody.parentNode.style.overflow = "hidden"
                 miniFx(tbody, "top", height, 0, 800)
                 miniFx(target, "bottom", 0, -22, {
                     duration: 500,
@@ -404,6 +430,7 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                     }
                 })
             }
+            //以动画方式从上向下隐藏tbody，露出tbody
             vm.hideTbody = function(e) {
                 var target = e.target
                 miniFx(target, "height", 22, 0, {
@@ -428,13 +455,14 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                     }
                 })
             }
+            //当拖动纵向滚动条时，更新可视区的数据，当拖动横向滚动条时，表头与tbody一起移动
             vm.renderTbody = function(e) {
                 var curTop = this.scrollTop
                 if (top !== curTop) {//如果是纵向滚动条
                     top = curTop
                     var min = Math.floor(top / options.rowHeight)
                     if (min + max <= total) {//刷新tbody
-                        model.min = min
+                        model.startIndex = min
                         var datas = avalon.mix(true, [], rawDatas.slice(min, min + max + 5))
                         for (var i = 0, n = datas.length; i < n; i++) {
                             vm.rows.set(i, datas[i])
@@ -473,8 +501,8 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
             columnWidth: 40
         },
         checkColHTML: '<div class="ui-grid-td"  ms-css-width="checkCol.columnWidth">' +
-                '   <input type="checkbox" class="ui-grid-checkbox" name="NAME" ms-checked="row.FIELD" ms-click="checkOne(min+$index)" /></div>',
-        indexColHTML: '<div class="ui-grid-td"  ms-css-width="indexCol.columnWidth">{{min+$index}}</div>',
+                '   <input type="checkbox" class="ui-grid-checkbox" name="NAME" ms-checked="row.FIELD" ms-click="checkOne(startIndex+$index)" /></div>',
+        indexColHTML: '<div class="ui-grid-td"  ms-css-width="indexCol.columnWidth">{{startIndex+$index}}</div>',
         indexCol: {
             type: 0,
             columnWidth: 30

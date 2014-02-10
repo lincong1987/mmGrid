@@ -1,10 +1,10 @@
-<div class="ui-grid-thead" 
+<div class="ui-grid-thead"
+     id="#VMID#Thead"
      ms-css-width="realWidth"
-     ms-click="theadChick" 
+     ms-css-left="scrollLeft"
      ms-mousedown="theadDown"  
      ms-mouseenter="showSlider"
-     ms-css-left="scrollLeft"
-     id="#VMID#Thead"
+     ms-click="theadChick" 
      >
     <div ms-if="checkCol.type" class="ui-grid-col"  ms-css-height="headerHeight"  ms-css-width="checkCol.columnWidth"  >
         <input type="checkbox" class="ui-grid-checkbox" ms-disabled="checkCol.type === 1" ms-click="checkAll">
@@ -33,30 +33,40 @@
         <h1>显示列</h1>
         <label ms-repeat="columns"><input type="checkbox" ms-disabled="el.lockDisplay"  ms-duplex-radio="el.toggle"><span>{{el.text}}</span></label>
     </div>
-    <div class="ui-grid-tbody ui-helper-unselect" id="#VMID#Tbody" 
+    <div class="ui-grid-tbody ui-helper-unselect" 
+         id="#VMID#Tbody" 
          ms-css-height="viewportHeight" 
          ms-on-scroll="renderTbody" 
          ms-dblclick="editCell"
          ms-mouseenter="hideSlider"
+
          >
         <div style="position:relative"ms-css-height="realHeight" ms-css-width="realWidth"  >
             <div class="ui-grid-tr ui-widget-content" ms-repeat-row="rows"
                  ms-hover="ui-state-hover"
                  ms-css-top="srollTop + $index * 25"
-                 ms-class="even: (min + $index) % 2 === 0"  
-                 ms-class-1="odd: (min + $index) % 2 !== 0" 
-                 ms-visible="min+$index < total"
+                 ms-class="even: (startIndex + $index) % 2 === 0"  
+                 ms-class-1="odd: (startIndex + $index) % 2 !== 0" 
+                 ms-visible="startIndex+$index < total"
                  ms-css-height="rowHeight" 
                  >
                 <!--checkColHTML-->
                 <!--indexColHTML-->
                 <div  ms-repeat="row" data-with-sorted="getColumnsOrder" ms-css-width="getCellWidth($key)" ms-visible="getCellToggle($key)" class="ui-grid-td" >
-                    <div class="editable">{{$val}}</div><input class="ui-grid-textbox" ms-duplex="$val" style="display: none" ms-blur="uneditCell(min+$index, $key)">
-                </div 
+                    <div class="editable">{{$val}}</div><input class="ui-grid-textbox" 
+                                                               style="display: none"
+                                                               ms-duplex="$val"   
+                                                               ms-data-index="startIndex+$index" 
+                                                               ms-data-key="$key" 
+                                                               ms-keypress="uneditCell"
+                                                               ms-blur="uneditCell">
+                </div>
             </div>
         </div>
     </div>
-
+</div>
+<div>
+    {{startIndex}}  {{total}}
 </div>
 <div class="ui-grid-resizer" ms-visible="resizeToggle" ms-css-left="resizeLeft"></div>
 <style>
