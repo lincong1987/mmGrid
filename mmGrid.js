@@ -1,4 +1,4 @@
-define(["avalon", "text!mmGrid.html"], function(avalon, html) {
+define(["avalon", "avalon.pagination", "text!mmGrid.html"], function(avalon, pagination, html) {
 
 //=========================与调整列的位置相关的函数=====================
     function getPrev(array, el) {
@@ -89,9 +89,18 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                 model, el
         $element.addClass(" ui-grid ui-widget ui-helper-reset")
         var rawDatas = options.rows
-        var max = Math.min(rawDatas.length, options.maxRows)
+        //每页最多可滚动的数量（不显示分页栏，默认是一页就全部拖出来）
+        var scrollableRows = Math.min(rawDatas.length, options.maxRows)
+        //用于决定tbody的真实高度
         var total = rawDatas.length
-        avalon.log("只显示" + max + "行")
+
+        if (options.showPagination) {
+            scrollableRows = Math.min(options.perPages, options.maxRows)
+            total = options.perPages
+        }
+
+
+        avalon.log("只显示" + scrollableRows + "行")
         function makeColumns(array) {
             var ret = []
             for (var i = 0, el; el = array[i++]; ) {
@@ -165,9 +174,9 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
         html = html.replace("<!--indexColHTML-->", replacement)
 
         var model = avalon.define(data.gridId, function(vm) {
-
+            avalon.mix(vm, options)
             //非监控属性，用于提高性能
-            vm.$skipArray = ["columnsOrder", "indexCol"]
+            vm.$skipArray = ["columnsOrder", "indexCol", "pagination"]
             //出现在可视区中的行
             vm.rows = []
             //表头各列的顺序（除去checkCol与indexCol）
@@ -175,15 +184,12 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
             //生成表头的配置
             vm.columns = makeColumns(options.columns)
             //可视区的高度（用于制造纵向滚动条）
-            vm.viewportHeight = max * options.rowHeight
+            vm.viewportHeight = scrollableRows * options.rowHeight + (scrollableRows - 1)
             //可视区被裁剪掉的DIV的真实高度
             vm.realHeight = total * options.rowHeight
             //可视区被裁剪掉的DIV的真实高度
             vm.realWidth = options.columns.length * options.columnWidth
-            //纵向滚动条距滚动面板的顶部的距离（滚动面板可理解为可视区）
-            vm.srollTop = 0
-            //横向滚动条距滚动面板的左侧的距离（滚动面板可理解为可视区）
-            vm.scrollLeft = 0
+
             //data-with-sorted的回调
             vm.getColumnsOrder = function() {
                 return vm.columnsOrder
@@ -192,20 +198,11 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
             vm.startIndex = 0
             //总item数
             vm.total = total
-            //表头的格子的高
-            vm.headerHeight = options.headerHeight
-            //可视区的格子的高
-            vm.rowHeight = options.rowHeight
-            //用于控制 表头列排序时出现的虚线 的显隐
-            vm.resizeToggle = false
-            //用于控制 被可视区遮住的那个backboard面板（它用于配置各列的显示隐藏） 的显隐
-            vm.backboardToggle = false
-            // 表头列排序时出现的虚线 距离GRID最左侧的距离 
-            vm.resizeLeft = 1
+
             //checkCol的配置
             vm.checkCol = checkCol
-            //checkCol在单选情况下，被选中的那个索引值
-            vm.checkedIndex = NaN
+            //indexCol的配置
+            vm.indexCol = indexCol
             //checkCol在复选情况下，位于表头用于全选/非全选的checkbox的点击事件回调
             vm.checkAll = function() {
                 var field = checkCol.field, checked = this.checked
@@ -224,8 +221,7 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                     model.checkedIndex = index
                 }
             }
-            //indexCol的配置
-            vm.indexCol = indexCol
+
             //获得表头的真实宽度（用于制造纵向滚动条）
             vm.getRealWidth = function(elem) {
                 var thead = elem && elem.nodeType == 1 ? elem : this, ret = 0
@@ -384,7 +380,7 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                             flag = false
                             curTH.style.left = "0px"
                             if (model.columnsOrder.join("") !== origin.join("")) {
-                                var datas = avalon.mix(true, [], rawDatas.slice(model.startIndex, model.startIndex + max + 5))
+                                var datas = avalon.mix(true, [], rawDatas.slice(model.startIndex, model.startIndex + scrollableRows + 5))
                                 model.rows = datas
                             }
                             avalon.unbind(window, "mousemove", moveFn)
@@ -455,15 +451,16 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                     }
                 })
             }
+            vm.showPagination = true
             //当拖动纵向滚动条时，更新可视区的数据，当拖动横向滚动条时，表头与tbody一起移动
             vm.renderTbody = function(e) {
                 var curTop = this.scrollTop
                 if (top !== curTop) {//如果是纵向滚动条
                     top = curTop
                     var min = Math.floor(top / options.rowHeight)
-                    if (min + max <= total) {//刷新tbody
-                        model.startIndex = min
-                        var datas = avalon.mix(true, [], rawDatas.slice(min, min + max + 5))
+                    var goIf = vm.showPagination ? false : min + scrollableRows <= total
+                    if (goIf) {//刷新tbody
+                        var datas = avalon.mix(true, [], rawDatas.slice(min, min + scrollableRows + 5))
                         for (var i = 0, n = datas.length; i < n; i++) {
                             vm.rows.set(i, datas[i])
                         }
@@ -476,12 +473,49 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
                     model.scrollLeft = -1 * left
                 }
             }
+            vm.getPageVM = function(pvm) {
+                model.pagination = pvm
+                pvm.total = total
+                pvm.$watch("currentPage", function(a) {
+                    var cur = a - 1
+                    var per = model.perPages
+                    model.startIndex = cur
+                    var datas = avalon.mix(true, [], rawDatas.slice(cur * per, (cur + 1) * per))
+                 //   console.log([cur * per, (cur + 1) * per])
+                    for (var i = 0, n = datas.length; i < n; i++) {
+                        model.rows.set(i, datas[i])
+                    }
+                })
+
+                model.$watch("perPages", function(a) {
+
+                    var pvm = model.pagination
+                    pvm.perPages = a
+                    pvm.pages = pvm.getPages(pvm)
+
+                    var datas = avalon.mix(true, [], rawDatas.slice(model.startIndex, scrollableRows + 5))
+                    for (var i = 0, n = datas.length; i < n; i++) {
+                        model.rows.set(i, datas[i])
+                    }
+                })
+            }
+
+            //====================================================
+
         })
+
         // model.realWidth = getRealWidth(model)+20
         //比要显示的行数多五个
-        var datas = avalon.mix(true, [], rawDatas.slice(0, max + 5))
+        var datas = avalon.mix(true, [], rawDatas.slice(0, scrollableRows + 5))
+
+        if (model.showPagination) {
+            model.realHeight = model.perPages * model.rowHeight
+            model.pagination.perPages = model.perPages
+            model.pagination.total = model.total
+        }
 
         model.rows = datas
+
 
         avalon.nextTick(function() {
             element.innerHTML = html.replace(/#VMID#/g, model.$id)
@@ -489,23 +523,47 @@ define(["avalon", "text!mmGrid.html"], function(avalon, html) {
         })
     }
     widget.defaults = {
-        maxRows: 20,
+        maxRows: 15,
+        //可视区的格子的高
         rowHeight: 25,
+        //表头的格子的高
         headerHeight: 25,
         columnWidth: 160,
+        //纵向滚动条距滚动面板的顶部的距离（滚动面板可理解为可视区）
+        srollTop: 0,
+        //横向滚动条距滚动面板的左侧的距离（滚动面板可理解为可视区）
+        scrollLeft: 0,
         getColumnTitle: function() {
             return ""
         },
+        //用于控制 表头列排序时出现的虚线 的显隐
+        resizeToggle: false,
+        //用于控制 被可视区遮住的那个backboard面板（它用于配置各列的显示隐藏） 的显隐
+        backboardToggle: false,
+        // 表头列排序时出现的虚线 距离GRID最左侧的距离 
+        resizeLeft: 1,
+        checkColHTML: '<div class="ui-grid-td"  ms-css-width="checkCol.columnWidth">' +
+                '   <input type="checkbox" class="ui-grid-checkbox" name="NAME" ms-checked="row.FIELD" ms-click="checkOne(startIndex+$index)" /></div>',
+        indexColHTML: '<div class="ui-grid-td"  ms-css-width="indexCol.columnWidth">{{startIndex+$index}}</div>',
+        //checkCol在单选情况下，被选中的那个索引值
+        checkedIndex: NaN,
         checkCol: {
             type: 0,
             columnWidth: 40
         },
-        checkColHTML: '<div class="ui-grid-td"  ms-css-width="checkCol.columnWidth">' +
-                '   <input type="checkbox" class="ui-grid-checkbox" name="NAME" ms-checked="row.FIELD" ms-click="checkOne(startIndex+$index)" /></div>',
-        indexColHTML: '<div class="ui-grid-td"  ms-css-width="indexCol.columnWidth">{{startIndex+$index}}</div>',
         indexCol: {
             type: 0,
             columnWidth: 30
+        },
+        limitList: [20, 30, 40, 50],
+        perPages: 20,
+        showPagination: true,
+        pagination: {
+            showPages: 5,
+            perPages: 20
+        },
+        formatLimitText: function(a) {
+            return a
         }
     }
     return avalon

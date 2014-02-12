@@ -65,10 +65,11 @@
         </div>
     </div>
 </div>
-<div>
-    {{startIndex}}  {{total}}
+{{total}}<div ms-widget="pagination, #VMID#_page" data-widget-defined="getPageVM">
+    {{startIndex}}  
 </div>
 <div class="ui-grid-resizer" ms-visible="resizeToggle" ms-css-left="resizeLeft"></div>
+<select ms-each="limitList" ms-duplex="perPages"><option ms-value="el">{{formatLimitText(el)}}</option></select>
 <style>
     .ui-grid-resizer{
         display: none;
