@@ -578,7 +578,7 @@ define(["avalon", "avalon.pagination", "text!mmGrid.html"], function(avalon, pag
             alwaysShowNext: true
         },
         formatLimitText: function(a) {
-            return a
+            return "每页"+a+"条"
         }
     }
     return avalon

@@ -18,5 +18,5 @@ mmGrid
 <li>checkbox栏 全选与非全选 ok </li>
 <li>索引栏 ok </li>
 <li>过滤功能</li>
-<li>分页功能</li>
+<li>分页功能 ok</li>
 </ul>
