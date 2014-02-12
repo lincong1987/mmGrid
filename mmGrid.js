@@ -50,6 +50,31 @@ define(["avalon", "avalon.pagination", "text!mmGrid.html"], function(avalon, pag
             return true
         }
     }
+    //================================updateTbody=========================================
+    function updateTbody(model, rawDatas) {
+        var datas = avalon.mix(true, [], rawDatas.slice(model.startIndex, model.startIndex + model.perPages))
+
+        var curLength = model.rows.length
+        //调整行数
+        while (curLength < datas.length) {
+            curLength = model.rows.push(avalon.mix(true, {}, rawDatas[0]))
+        }
+
+        while (curLength > datas.length) {
+            model.rows.pop()
+            curLength--
+        }
+        //调整tbody的实际高度
+        model.realHeight =  datas.length * model.rowHeight
+        //要显示的高度
+        var scrollableRows = Math.min(datas.length, model.perPages, model.maxRows)
+    
+        model.viewportHeight = scrollableRows * model.rowHeight + scrollableRows 
+        //更新内容
+        for (var i = 0, n = datas.length; i < n; i++) {
+            model.rows.set(i, datas[i])
+        }
+    }
     //==========================一个迷你的动画函数=================================
     function miniFx(elem, prop, from, to, opts) {
         var startTime = new Date
@@ -183,9 +208,9 @@ define(["avalon", "avalon.pagination", "text!mmGrid.html"], function(avalon, pag
             //生成表头的配置
             vm.columns = makeColumns(options.columns)
             //可视区的高度（用于制造纵向滚动条）
-            vm.viewportHeight = scrollableRows * options.rowHeight + (scrollableRows - 1)
+            vm.viewportHeight = scrollableRows * options.rowHeight + scrollableRows
             //可视区被裁剪掉的DIV的真实高度
-            vm.realHeight =  totalItems * options.rowHeight
+            vm.realHeight = totalItems * options.rowHeight
             //可视区被裁剪掉的DIV的真实高度
             vm.realWidth = options.columns.length * options.columnWidth
 
@@ -476,30 +501,19 @@ define(["avalon", "avalon.pagination", "text!mmGrid.html"], function(avalon, pag
                 console.log(pvm)
                 model.pagination = pvm
                 pvm.$watch("currentPage", function(a) {
-                    var cur = a - 1
-                    var per = model.perPages
-                    model.startIndex = cur * per
-                    var datas = avalon.mix(true, [], rawDatas.slice(cur * per, (cur + 1) * per))
-                    //   console.log([cur * per, (cur + 1) * per])
-                    for (var i = 0, n = datas.length; i < n; i++) {
-                        model.rows.set(i, datas[i])
-                    }
+                    model.startIndex = (a - 1) * model.perPages
+                    updateTbody(model, rawDatas, a)
                 })
-
+                //更换每页可滚动的项目数
                 model.$watch("perPages", function(a) {
-
                     var pvm = model.pagination
-                    pvm.perPages = a
+                    //更新分页栏
+                    pvm.perPages = parseInt(a)
                     pvm.pages = pvm.getPages(pvm)
-
-                    var datas = avalon.mix(true, [], rawDatas.slice(model.startIndex, scrollableRows + 5))
-                    for (var i = 0, n = datas.length; i < n; i++) {
-                        model.rows.set(i, datas[i])
-                    }
+                    //更新tbody
+                    updateTbody(model, rawDatas)
                 })
             }
-
-            //====================================================
 
         })
 
@@ -509,7 +523,6 @@ define(["avalon", "avalon.pagination", "text!mmGrid.html"], function(avalon, pag
 
         if (model.showPagination) {
             model.realHeight = model.perPages * model.rowHeight
-         //   model.totalItems = model.perPages
             model.pagination.perPages = model.perPages
             model.pagination.total = model.totalItems
         }

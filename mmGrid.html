@@ -65,11 +65,17 @@
         </div>
     </div>
 </div>
-{{totalItems}}<div ms-widget="pagination, #VMID#_page" data-widget-defined="getPageVM">
-    {{startIndex}}  
-</div>
 <div class="ui-grid-resizer" ms-visible="resizeToggle" ms-css-left="resizeLeft"></div>
-<select ms-each="limitList" ms-duplex="perPages"><option ms-value="el">{{formatLimitText(el)}}</option></select>
+<table style="width: 100%;">
+    <tr>
+        <td>总共有{{totalItems}}个</td>
+        <td ms-widget="pagination, #VMID#_page" data-widget-defined="getPageVM">
+        </td>
+        <td>
+            <select ms-each="limitList" ms-duplex="perPages"><option ms-value="el">{{formatLimitText(el)}}</option></select>
+        </td>
+    </tr>
+</table>
 <style>
     .ui-grid-resizer{
         display: none;
