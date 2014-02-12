@@ -481,7 +481,7 @@ define(["avalon", "avalon.pagination", "text!mmGrid.html"], function(avalon, pag
                     var per = model.perPages
                     model.startIndex = cur
                     var datas = avalon.mix(true, [], rawDatas.slice(cur * per, (cur + 1) * per))
-                 //   console.log([cur * per, (cur + 1) * per])
+                    //   console.log([cur * per, (cur + 1) * per])
                     for (var i = 0, n = datas.length; i < n; i++) {
                         model.rows.set(i, datas[i])
                     }
@@ -560,7 +560,9 @@ define(["avalon", "avalon.pagination", "text!mmGrid.html"], function(avalon, pag
         showPagination: true,
         pagination: {
             showPages: 5,
-            perPages: 20
+            perPages: 20,
+            alwaysShowPrev: true,
+            alwaysShowNext: true
         },
         formatLimitText: function(a) {
             return a

@@ -352,10 +352,10 @@
             node.onreadystatechange = function() {
                 drainQueue() //在interactive阶段就触发
                 node.onreadystatechange = null
-                root.removeChild(node)
+                head.removeChild(node)
                 node = null
-            }
-            root.appendChild(node)
+            }//fix IE6https://github.com/RubyLouvre/avalon/issues/269
+            head.inertBefore(node, head.firstChild)
         }
     } else {
         avalon.nextTick = function(callback) {
@@ -1698,7 +1698,7 @@
                         if (type == "if" && param == "loop") {
                             binding.priority += 100
                         }
-                        if (type === "widget" || type == "if") {
+                        if (type === "widget") {
                             bindings.push(binding)
                         } else if (vmodels.length) {
                             bindings.push(binding)
@@ -2266,19 +2266,17 @@
                 var locatedNode = getLocatedNode(parent, data, pos)
             }
             switch (method) {
-                case "add":
-                    // 为了保证了withIterator的add一致，需要对调一下第2，第3参数
+                case "add"://在pos位置后添加el数组（pos为数字，el为数组）
                     var arr = el
                     var last = data.getter().length - 1
                     var transation = documentFragment.cloneNode(false)
                     var spans = []
                     for (var i = 0, n = arr.length; i < n; i++) {
                         var ii = i + pos
-                        var proxy = createEachProxy(ii, arr[i], data, last) //300
+                        var proxy = createEachProxy(ii, arr[i], data, last)
                         proxies.splice(ii, 0, proxy)
                         shimController(data, transation, spans, proxy)
                     }
-                    //得到插入位置 IE6-10要求insertBefore的第2个参数为节点或null，不能为undefined
                     locatedNode = getLocatedNode(parent, data, pos)
                     parent.insertBefore(transation, locatedNode)
                     for (var i = 0, el; el = spans[i++]; ) {
@@ -2286,11 +2284,11 @@
                     }
                     spans = null
                     break
-                case "del":
+                case "del"://将pos后的el个元素删掉(pos, el都是数字)
                     proxies.splice(pos, el) //移除对应的子VM
                     removeFromSanctuary(removeView(locatedNode, group, el))
                     break
-                case "index":
+                case "index"://将proxies中的第pos个起的所有元素重新索引（pos为数字，el用作循环变量）
                     var last = proxies.length - 1
                     for (; el = proxies[pos]; pos++) {
                         el.$index = pos
@@ -2318,7 +2316,7 @@
                     if (proxies)
                         proxies.length = 0
                     break
-                case "move":
+                case "move"://将proxies中的第pos个元素移动el位置上(pos, el都是数字)
                     var t = proxies.splice(pos, 1)[0]
                     if (t) {
                         proxies.splice(el, 0, t)
@@ -2327,13 +2325,13 @@
                         parent.insertBefore(moveNode, locatedNode)
                     }
                     break
-                case "set":
+                case "set"://将proxies中的第pos个元素的VM设置为el（pos为数字，el任意）
                     var proxy = proxies[pos]
                     if (proxy) {
                         proxy[proxy.$itemName] = el
                     }
                     break
-                case "append":
+                case "append"://将pos的键值对从el中取出（pos为一个普通对象，el为预先生成好的代理VM对象池）
                     var pool = el
                     var transation = documentFragment.cloneNode(false)
                     var callback = getBindingCallback(data.callbackElement, "data-with-sorted", data.vmodels)
@@ -2355,14 +2353,14 @@
                             shimController(data, transation, spans, pool[key])
                         }
                     }
-                    parent.insertBefore(transation, data.endRepeat || null) //再插到最后
+                    parent.insertBefore(transation, data.endRepeat || null)
                     for (var i = 0, el; el = spans[i++]; ) {
                         scanTag(el, data.vmodels)
                     }
                     spans = null
                     break
             }
-            iteratorCallback(data, method)
+            iteratorCallback.call(data, arguments)
         },
         "html": function(val, elem, data) {
             val = val == null ? "" : val
@@ -2664,6 +2662,7 @@
                     element = data.element,
                     widget = args[0],
                     vmOptions = {}
+
             if (args[1] === "$") {
                 args[1] = void 0
             }
@@ -2673,6 +2672,7 @@
             data.value = args.join(",")
             var constructor = avalon.ui[widget]
             if (typeof constructor === "function") { //ms-widget="tabs,tabsAAA,optname"
+                vmodels = element.vmodels || vmodels
                 for (var i = 0, v; v = vmodels[i++]; ) {
                     if (VMODELS[v.$id]) { //取得离它最近由用户定义的VM
                         var nearestVM = v
@@ -2697,8 +2697,10 @@
                 var callback = getBindingCallback(element, "data-widget-defined", vmodels)
                 if (callback) {
                     callback.call(element, widgetVM)
-                }
-            } //如果碰到此组件还没有加载的情况，将停止扫描它的内部
+                } 
+            } else if (vmodels.length) {//如果该组件还没有加载，那么保存当前的vmodels
+                element.vmodels = vmodels
+            }
             return true
         }
     }
@@ -3171,14 +3173,14 @@
         parent.textContent = ""
     }
 
-    function iteratorCallback(data, method) {
-        var callback = getBindingCallback(data.callbackElement, data.callbackName, data.vmodels)
-        var parent = data.parent
-        checkScan(parent, function() {
-            if (callback) {
-                callback.call(parent, method)
-            }
-        })
+    function iteratorCallback() {
+        var callback = getBindingCallback(this.callbackElement, this.callbackName, this.vmodels)
+        if (callback) {
+            var parent = this.parent, args = arguments
+            checkScan(parent, function() {
+                callback.apply(parent, args)
+            })
+        }
     }
     //为ms-each, ms-with, ms-repeat要循环的元素外包一个msloop临时节点，ms-controller的值为代理VM的$id
 
