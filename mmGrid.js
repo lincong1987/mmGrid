@@ -92,11 +92,10 @@ define(["avalon", "avalon.pagination", "text!mmGrid.html"], function(avalon, pag
         //每页最多可滚动的数量（不显示分页栏，默认是一页就全部拖出来）
         var scrollableRows = Math.min(rawDatas.length, options.maxRows)
         //用于决定tbody的真实高度
-        var total = rawDatas.length
+        var totalItems = rawDatas.length
 
         if (options.showPagination) {
             scrollableRows = Math.min(options.perPages, options.maxRows)
-            total = options.perPages
         }
 
 
@@ -186,7 +185,7 @@ define(["avalon", "avalon.pagination", "text!mmGrid.html"], function(avalon, pag
             //可视区的高度（用于制造纵向滚动条）
             vm.viewportHeight = scrollableRows * options.rowHeight + (scrollableRows - 1)
             //可视区被裁剪掉的DIV的真实高度
-            vm.realHeight = total * options.rowHeight
+            vm.realHeight =  totalItems * options.rowHeight
             //可视区被裁剪掉的DIV的真实高度
             vm.realWidth = options.columns.length * options.columnWidth
 
@@ -197,7 +196,7 @@ define(["avalon", "avalon.pagination", "text!mmGrid.html"], function(avalon, pag
             //当前可视区显示的第一个item
             vm.startIndex = 0
             //总item数
-            vm.total = total
+            vm.totalItems = totalItems
 
             //checkCol的配置
             vm.checkCol = checkCol
@@ -458,7 +457,7 @@ define(["avalon", "avalon.pagination", "text!mmGrid.html"], function(avalon, pag
                 if (top !== curTop) {//如果是纵向滚动条
                     top = curTop
                     var min = Math.floor(top / options.rowHeight)
-                    var goIf = vm.showPagination ? false : min + scrollableRows <= total
+                    var goIf = vm.showPagination ? false : min + scrollableRows <= model.totalItems
                     if (goIf) {//刷新tbody
                         var datas = avalon.mix(true, [], rawDatas.slice(min, min + scrollableRows + 5))
                         for (var i = 0, n = datas.length; i < n; i++) {
@@ -474,12 +473,12 @@ define(["avalon", "avalon.pagination", "text!mmGrid.html"], function(avalon, pag
                 }
             }
             vm.getPageVM = function(pvm) {
+                console.log(pvm)
                 model.pagination = pvm
-                pvm.total = total
                 pvm.$watch("currentPage", function(a) {
                     var cur = a - 1
                     var per = model.perPages
-                    model.startIndex = cur
+                    model.startIndex = cur * per
                     var datas = avalon.mix(true, [], rawDatas.slice(cur * per, (cur + 1) * per))
                     //   console.log([cur * per, (cur + 1) * per])
                     for (var i = 0, n = datas.length; i < n; i++) {
@@ -510,8 +509,9 @@ define(["avalon", "avalon.pagination", "text!mmGrid.html"], function(avalon, pag
 
         if (model.showPagination) {
             model.realHeight = model.perPages * model.rowHeight
+         //   model.totalItems = model.perPages
             model.pagination.perPages = model.perPages
-            model.pagination.total = model.total
+            model.pagination.total = model.totalItems
         }
 
         model.rows = datas
