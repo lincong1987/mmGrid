@@ -65,11 +65,11 @@ define(["avalon", "avalon.pagination", "text!mmGrid.html"], function(avalon, pag
             curLength--
         }
         //调整tbody的实际高度
-        model.realHeight =  datas.length * model.rowHeight
+        model.realHeight = datas.length * model.rowHeight
         //要显示的高度
         var scrollableRows = Math.min(datas.length, model.perPages, model.maxRows)
-    
-        model.viewportHeight = scrollableRows * model.rowHeight + scrollableRows 
+
+        model.viewportHeight = scrollableRows * model.rowHeight + scrollableRows
         //更新内容
         for (var i = 0, n = datas.length; i < n; i++) {
             model.rows.set(i, datas[i])
@@ -498,7 +498,6 @@ define(["avalon", "avalon.pagination", "text!mmGrid.html"], function(avalon, pag
                 }
             }
             vm.getPageVM = function(pvm) {
-                console.log(pvm)
                 model.pagination = pvm
                 pvm.$watch("currentPage", function(a) {
                     model.startIndex = (a - 1) * model.perPages
@@ -514,7 +513,24 @@ define(["avalon", "avalon.pagination", "text!mmGrid.html"], function(avalon, pag
                     updateTbody(model, rawDatas)
                 })
             }
-
+            vm.showFilter = false
+            vm.currentFilterField = ""
+            vm.filterItemsCallback = function(e) {
+                var curValue = this.value, field = vm.currentFilterField
+                if (e.which === 13) {
+                    if (curValue) {
+                        var array = rawDatas.filter(function(el) {
+                            return el[field] === curValue
+                        })
+                        updateTbody(model, array)
+                    } else {
+                        updateTbody(model, rawDatas)
+                    }
+                }
+            }
+            vm.showFilterCallback = function() {
+                vm.showFilter = !vm.showFilter
+            }
         })
 
         // model.realWidth = getRealWidth(model)+20
@@ -571,6 +587,8 @@ define(["avalon", "avalon.pagination", "text!mmGrid.html"], function(avalon, pag
         limitList: [20, 30, 40, 50],
         perPages: 20,
         showPagination: true,
+        showFilterText: "find",
+        showFilterClass: "ui-grid-filter-btn",
         pagination: {
             showPages: 5,
             perPages: 20,
@@ -578,7 +596,7 @@ define(["avalon", "avalon.pagination", "text!mmGrid.html"], function(avalon, pag
             alwaysShowNext: true
         },
         formatLimitText: function(a) {
-            return "每页"+a+"条"
+            return "每页" + a + "条"
         }
     }
     return avalon
