@@ -3,9 +3,8 @@ mmGrid
 
 一个什么也拖不死的grid
 
-正在设计中
 
-目标功能如下
+功能如下
 <ul>
 <li>表头固定  ok</li>
 <li>拖动表头调整列宽 ok </li>
@@ -17,6 +16,6 @@ mmGrid
 <li>掠过变色 ok </li>
 <li>checkbox栏 全选与非全选 ok </li>
 <li>索引栏 ok </li>
-<li>过滤功能</li>
+<li>过滤功能 ok</li>
 <li>分页功能 ok</li>
 </ul>
