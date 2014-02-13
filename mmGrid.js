@@ -112,7 +112,7 @@ define(["avalon", "avalon.pagination", "text!mmGrid.html"], function(avalon, pag
     var widget = avalon.ui.grid = function(element, data, vmodels) {
         var $element = avalon(element), options = data.gridOptions,
                 model, el
-        $element.addClass(" ui-grid ui-widget ui-helper-reset")
+        $element.addClass(" ui-grid ui-widget ui-helper-reset ui-corner-tl ui-corner-tr ui-helper-clearfix")
         var rawDatas = options.rows
         //每页最多可滚动的数量（不显示分页栏，默认是一页就全部拖出来）
         var scrollableRows = Math.min(rawDatas.length, options.maxRows)
@@ -305,11 +305,19 @@ define(["avalon", "avalon.pagination", "text!mmGrid.html"], function(avalon, pag
             //对某一列的所有行进行排序，使用事件代理
             vm.theadChick = function(e) {
                 var target = e.target
-                if (target.className.indexOf("ui-helper-sorter") !== -1) {
+                while (target.className.indexOf("ui-helper-sorter") == -1) {
+                    target = target.parentNode
+                    if (!target) {
+                        break;
+                    }
+                }
+                if (target && target.nodeType === 1) {
                     e.preventDefault()
                     var proxy = target.parentNode["data-vm"]
                     var field = proxy.field
-                    var trend = target.innerHTML.trim() === "▲"
+                    var text = "innerText" in target ? target.innerText : target.textContent;
+                    trend = text.trim() === "▲"
+                    console.log(text)
                     vm.rows.sort(function(a, b) {
                         var ret = a[field] - b[field]
                         return ret * (trend ? 1 : -1)
@@ -318,7 +326,7 @@ define(["avalon", "avalon.pagination", "text!mmGrid.html"], function(avalon, pag
                     for (var i = 0, el; el = models[i]; i++) {//同步原始数组
                         rawDatas[j + i] = el
                     }
-                    target.innerHTML = trend ? "▼" : "▲"
+                    target.innerHTML = trend ? '<span class="ui-icon ui-icon-triangle-1-s">▼</span>' : '<span class="ui-icon ui-icon-triangle-1-n">▲</span>'
                 }
             }
             //实现表头拖动列宽，使用事件代理

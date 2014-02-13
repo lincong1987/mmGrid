@@ -1,4 +1,4 @@
-<div class="ui-grid-thead"
+<div class="ui-grid-thead ui-widget-header"
      id="#VMID#Thead"
      ms-css-width="realWidth"
      ms-css-left="scrollLeft"
@@ -21,13 +21,16 @@
          ms-visible="el.toggle" 
          ms-data-vm="el">
         {{el.text}}
-        <button type="button" class="ui-helper-sorter" ms-if="el.sortable" lang="ru"  >▲</button>
+        <button type="button" class="ui-helper-sorter " ms-if="el.sortable" ><span class="ui-icon ui-icon-triangle-1-n" >▲</span></button>
         <div ms-if="!el.lockWidth" class="ui-helper-resizer" ></div>
     </div>
 </div>
 <div class="ui-grid-viewport" ms-css-height="viewportHeight" >
-    <a class="ui-helper-slide-up"  id="#VMID#SlideUp" ms-click="showTbody"></a>
-    <a class="ui-helper-slide-down" ms-click="hideTbody" id="#VMID#SlideDown" ms-mouseleave="hideSlider">
+    <a class="ui-helper-slide-up ui-widget-content ui-corner-tl ui-corner-tr"  id="#VMID#SlideUp" ms-click="showTbody">
+        <span class="ui-icon ui-icon-circle-arrow-n" ></span>
+    </a>
+    <a class="ui-helper-slide-down ui-widget-content ui-corner-bl ui-corner-br" id="#VMID#SlideDown" ms-click="hideTbody" ms-mouseleave="hideSlider">
+        <span class="ui-icon ui-icon-circle-arrow-s"></span>
     </a>
     <div class="ui-grid-backboard" ms-visible="backboardToggle"  ms-css-height="viewportHeight" >
         <h1>显示列</h1>
@@ -72,9 +75,9 @@
         <option ms-repeat="columns" ms-value="el.field">{{el.text}}</option>
     </select>
 </div>
-<table style="width: 100%;" ms-if="showPagination">
+<table style="width: 100%;" ms-if="showPagination" class="ui-widget-header  ui-corner-bl ui-corner-br">
     <tr>
-        <td><span ms-click="showFilterCallback" class="ui-grid-filter-btn">{{showFilterText | html}}</span>共{{totalItems}}条记录</td>
+        <td><span ms-click="showFilterCallback" class="ui-grid-filter-btn ui-corner-all">{{showFilterText | html}}</span>共{{totalItems}}条记录</td>
         <td ms-widget="pagination, #VMID#_page" data-widget-defined="getPageVM">
         </td>
         <td>
@@ -171,13 +174,7 @@
         height: 20px;
         display: none;
         z-index: 30;
-        /*  background: #fff url(img/arrow_down.png) no-repeat center center;*/
-        background: #f1f1f1;
-        border: 1px solid #ccc;
         border-top: 0;
-        -webkit-border-radius: 2px;
-        -moz-border-radius: 2px;
-        border-radius: 2px;
         -webkit-box-shadow: 1px 1px 3px #ccc;
         -moz-box-shadow: 1px 1px 3px #ccc;
         -o-box-shadow: 1px 1px 3px #ccc;
@@ -193,13 +190,7 @@
         z-index: 30;
         width: 50px;
         height: 20px;
-        /*  background: #fff url(img/arrow_up.png) no-repeat center center;*/
-        background: #f1f1f1;
-        border: 1px solid #ccc;
         border-bottom: 0;
-        -webkit-border-radius: 2px;
-        -moz-border-radius: 2px;
-        border-radius: 2px;
         -webkit-box-shadow: 1px 1px 3px #ccc;
         -moz-box-shadow: 1px 1px 3px #ccc;
         -o-box-shadow: 1px 1px 3px #ccc;
@@ -207,32 +198,34 @@
         box-shadow: 1px 1px 3px #ccc;
         cursor: pointer;
     }
-
-
+    .ui-helper-slide-up span, .ui-helper-slide-down span{
+        margin-left:auto;
+        margin-right:auto;
+        text-align: center;
+    }
     .ui-grid-col{
         position: relative;
         margin-top:-1px;
         overflow: hidden;
         float: left;
-        border: 1px solid #eee;
-        background: white;
+        font-weight: normal;
     }
+
     .ui-helper-sorter{
         position: absolute;
         top: 0;
-        right: 8px;
-        width: 10px;
+        right: 0px;
+        width: 16px;
         height: 100%;
         margin: 0px;
         border:none 0;
         color:black;
         cursor: pointer;
-        font-family: Arial、Helvetica;
         padding:0px;
-        font-size:8px;
-        -webkit-text-size-adjust:none;
+        font-family: Arial、Helvetica;
         background: transparent;
     }
+
     .ui-helper-resizer{
         position: absolute;
         top: 0;
