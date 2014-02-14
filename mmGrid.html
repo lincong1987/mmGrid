@@ -44,12 +44,11 @@
          ms-mouseenter="hideSlider"
 
          >
-        <div style="position:relative"ms-css-height="realHeight" ms-css-width="realWidth"  >
+        <div style="position:relative"ms-css-height="realHeight" ms-css-width="realWidth" class="ui-widget-content" >
             <div class="ui-grid-tr ui-widget-content" ms-repeat-row="rows"
                  ms-hover="ui-state-hover"
                  ms-css-top="srollTop + $index * 25"
-                 ms-class="even: (startIndex + $index) % 2 === 0"  
-                 ms-class-1="odd: (startIndex + $index) % 2 !== 0" 
+                 ms-class="ui-state-default: (startIndex + $index) % 2 === 0"  
                  ms-visible="startIndex+$index < total"
                  ms-css-height="rowHeight" 
                  >
@@ -235,9 +234,6 @@
         cursor: col-resize;
     }
 
-    div.ui-grid-tr:hover .ui-grid-td, div.ui-state-hover .ui-grid-td{
-        background:rgb(255,249,117)!important;
-    }
     .ui-grid-td{
         margin-left:-1px;
         border: 1px solid #eee;
@@ -246,7 +242,6 @@
         overflow: hidden;
         float: left;
         height: 100%;
-        background: white;
     }
     .ui-grid-td .editable{
         position: absolute;
@@ -263,9 +258,7 @@
         white-space: nowrap;
         cursor: default;
     }
-    .ui-grid-tr.even .ui-grid-td{
-        background: #e1eff8;
-    }
+
     .ui-grid-td .ui-grid-textbox{
         width:100%;
         height: 95%;

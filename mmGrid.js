@@ -316,8 +316,7 @@ define(["avalon", "avalon.pagination", "text!mmGrid.html"], function(avalon, pag
                     var proxy = target.parentNode["data-vm"]
                     var field = proxy.field
                     var text = "innerText" in target ? target.innerText : target.textContent;
-                    trend = text.trim() === "▲"
-                    console.log(text)
+                    var trend = text.trim() === "▲"
                     vm.rows.sort(function(a, b) {
                         var ret = a[field] - b[field]
                         return ret * (trend ? 1 : -1)
