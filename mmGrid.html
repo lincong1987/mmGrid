@@ -45,7 +45,7 @@
 
          >
         <div style="position:relative"ms-css-height="realHeight" ms-css-width="realWidth" class="ui-widget-content" >
-            <div class="ui-grid-tr ui-widget-content" ms-repeat-row="rows"
+            <div class="ui-grid-tr ui-widget-content ui-helper-noimage " ms-repeat-row="rows"
                  ms-hover="ui-state-hover"
                  ms-css-top="srollTop + $index * 25"
                  ms-class="ui-state-default: (startIndex + $index) % 2 === 0"  
@@ -74,10 +74,10 @@
         <option ms-repeat="columns" ms-value="el.field">{{el.text}}</option>
     </select>
 </div>
-<table style="width: 100%;" ms-if="showPagination" class="ui-widget-header  ui-corner-bl ui-corner-br">
-    <tr>
+<table style="width: 100%;" ms-if="showPagination" class="ui-widget-header ui-state-default ui-corner-bl ui-corner-br">
+    <tr class="">
         <td><span ms-click="showFilterCallback" class="ui-grid-filter-btn ui-corner-all">{{showFilterText | html}}</span>共{{totalItems}}条记录</td>
-        <td ms-widget="pagination, #VMID#_page" data-widget-defined="getPageVM">
+        <td ms-widget="pagination, #VMID#_page" class="ui-state-default" data-widget-defined="getPageVM">
         </td>
         <td>
             <select ms-each="limitList" ms-duplex="perPages"><option ms-value="el">{{formatLimitText(el)}}</option></select>
@@ -207,7 +207,11 @@
         margin-top:-1px;
         overflow: hidden;
         float: left;
+        line-height: 2;
         font-weight: normal;
+    }
+    .ui-helper-noimage{
+        background-image: none!important;
     }
 
     .ui-helper-sorter{

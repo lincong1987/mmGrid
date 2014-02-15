@@ -307,7 +307,7 @@ define(["avalon", "avalon.pagination", "text!mmGrid.html"], function(avalon, pag
                 var target = e.target
                 while (target.className.indexOf("ui-helper-sorter") == -1) {
                     target = target.parentNode
-                    if (!target) {
+                    if ( target.nodeType!== 1) {
                         break;
                     }
                 }
@@ -563,7 +563,7 @@ define(["avalon", "avalon.pagination", "text!mmGrid.html"], function(avalon, pag
         //可视区的格子的高
         rowHeight: 25,
         //表头的格子的高
-        headerHeight: 25,
+        headerHeight: 35,
         columnWidth: 160,
         //纵向滚动条距滚动面板的顶部的距离（滚动面板可理解为可视区）
         srollTop: 0,
@@ -593,6 +593,7 @@ define(["avalon", "avalon.pagination", "text!mmGrid.html"], function(avalon, pag
         },
         limitList: [20, 30, 40, 50],
         perPages: 20,
+        findText: "find",
         showPagination: true,
         showFilterText: "find",
         showFilterClass: "ui-grid-filter-btn",
