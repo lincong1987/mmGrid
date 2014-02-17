@@ -5,7 +5,7 @@
  http://weibo.com/jslouvre/
  
  Released under the MIT license
- avalon 1.1 2014.1.25
+ avalon 1.2 2014.2.17
  ==================================================*/
 (function(DOC) {
     var Registry = {} //将函数曝光到此对象上，方便访问器收集依赖
@@ -891,7 +891,7 @@
             return match.charAt(1).toUpperCase()
         })
     }
-    var rparse = /^(?:null|false|true|NaN|\{.*\}|\[.*\])$/
+
     var rnospaces = /\S+/g
 
     avalon.fn.mix({
@@ -1048,17 +1048,16 @@
             return get ? val : this
         }
     })
-
-    function parseData(val) {
-        var _eval = false
-        if (rparse.test(val) || +val + "" === val) {
-            _eval = true
-        }
+    function parseData(data) {
         try {
-            return _eval ? eval("0," + val) : val
+            data = data === "true" ? true :
+                    data === "false" ? false :
+                    data === "null" ? null :
+                    data === "NaN" ? NaN :
+                    +data + "" === data ? +data : eval("0," + data)
         } catch (e) {
-            return val
         }
+        return data
     }
     //生成avalon.fn.scrollLeft, avalon.fn.scrollTop方法
     avalon.each({
@@ -1589,6 +1588,7 @@
             //ms-important不包含父VM，ms-controller相反
             vmodels = node === b ? [newVmodel] : [newVmodel].concat(vmodels)
             elem.removeAttribute(node.name) //removeAttributeNode不会刷新[ms-controller]样式规则
+            avalon(elem).removeClass(node.name)
         }
         scanAttr(elem, vmodels) //扫描特性节点
     }
@@ -2052,7 +2052,7 @@
     }
     var rdash = /\(([^)]*)\)/
 
-    var styleEl = '<style id="avalonStyle">.fixMsIfFlicker{ display: none!important }</style>'
+    var styleEl = '<style id="avalonStyle">.avalonHide{ display: none!important }</style>'
     styleEl = avalon.parseHTML(styleEl).firstChild //IE6-8 head标签的innerHTML是只读的
     head.insertBefore(styleEl, null) //避免IE6 base标签BUG
     var rnoscripts = /<noscript.*?>(?:[\s\S]+?)<\/noscript>/img
@@ -2431,7 +2431,8 @@
         },
         "visible": function(val, elem, data) {
             elem.style.display = val ? data.display : "none"
-        }
+        },
+        "widget": noop
     }
     //这里的函数只会在第一次被扫描后被执行一次，并放进行对应VM属性的subscribers数组内（操作方为registerSubscriber）
     var bindingHandlers = avalon.bindingHandlers = {
@@ -2729,6 +2730,7 @@
         }
         //当value变化时改变model的值
         var updateModel = function() {
+            element.oldValue = element.vlaue
             if ($elem.data("duplex-observe") !== false) {
                 evaluator(valueAccessor())
             }
@@ -2786,18 +2788,7 @@
                     data.rollback = function() {
                         element.removeEventListener("input", updateModel)
                     }
-                    //IE6-11, chrome, firefox, opera(不支持window下的safari)
-                    if (Object.defineProperty) {
-                        Object.defineProperty(element, "value", {
-                            set: InputSetter,
-                            get: InputGetter,
-                            enumerable: true,
-                            configurable: true
-                        })
-                    } else if (element.__defineSetter__) {
-                        element.__defineSetter__("value", InputSetter)
-                        element.__defineGetter__("value", InputGetter)
-                    }
+
                 } else {
                     removeFn = function(e) {
                         if (e.propertyName === "value") {
@@ -2810,7 +2801,7 @@
                     }
                 }
 
-                if (DOC.documentMode === 9) { //fuck IE9
+                if (DOC.documentMode === 9) { // IE9 无法在切剪中同步VM
                     var selectionchange = function(e) {
                         if (e.type === "focus") {
                             DOC.addEventListener("selectionchange", updateModel)
@@ -2829,21 +2820,50 @@
                 }
             }
         }
-
+        if (!hackValueSetter) {//chrome, opera, safari
+            element.oldValue = element.value
+            checkElements.push(element)
+        }
         registerSubscriber(data)
     }
-    function InputSetter(newValue) {
-        var node = this.attributes.value
-        if (!node || newValue !== node.value) {
-            this.setAttribute("value", newValue)
-            var event = DOC.createEvent("Event")
-            event.initEvent("input", true, true)
-            this.dispatchEvent(event)
+    var checkElements = []
+    setInterval(function() {
+        for (var n = checkElements.length - 1; n >= 0; n--) {
+            var el = checkElements[n]
+            if (el.parentNode) {
+                if (el.oldValue == el.value) {
+                    el.oldValue = el.value
+                    avalon.fire(el, "input")
+                } else {
+                    checkElements.splice(n, 1)
+                }
+            }
         }
-    }
-    function InputGetter() {
-        var node = this.attributes.value
-        return node ? node.value : ""
+    }, 16)
+    //http://msdn.microsoft.com/en-us/library/dd229916(VS.85).aspx
+    //https://docs.google.com/document/d/1jwA8mtClwxI-QJuHT7872Z0pxpZz8PBkf2bGAbsUtqs/edit?pli=1
+    //IE9-11, firefox3+
+    var hackValueSetter = true
+    if (window.HTMLInputElement) {
+        var inputProto = HTMLInputElement.prototype, oldSetter
+        function newSetter(newValue) {
+            var oldValue = this.getAttribute("value")
+            if (newValue !== oldValue) {
+                this.setAttribute("value", newValue)
+                oldSetter.call(this, newValue)
+                var event = DOC.createEvent("Event")
+                event.initEvent("input", true, true)
+                this.dispatchEvent(event)
+            }
+        }
+        try {
+            oldSetter = Object.getOwnPropertyDescriptor(inputProto, "value").set
+            Object.defineProperty(inputProto, "value", {
+                set: newSetter
+            })
+        } catch (e) {
+        }
+        hackValueSetter = !!oldSetter
     }
     modelBinding.SELECT = function(element, evaluator, data, oldValue) {
         var $elem = avalon(element)
@@ -3919,7 +3939,6 @@
     avalon.config({
         loader: true
     })
-    var msSelector = "[ms-controller],[ms-important],[ms-widget]"
     avalon.ready(function() {
         //IE6-9下这个通常只要1ms,而且没有副作用，不会发出请求，setImmediate如果只执行一次，与setTimeout一样要140ms上下
         if (window.VBArray && !window.setImmediate) {
@@ -3947,24 +3966,7 @@
                 head.appendChild(node)
             }
         }
-        if (W3C && DOC.querySelectorAll) {
-            var elems = DOC.querySelectorAll(msSelector),
-                    nodes = []
-            for (var i = 0, elem; elem = elems[i++]; ) {
-                if (!elem.__root__) {
-                    var array = elem.querySelectorAll(msSelector)
-                    for (var j = 0, el; el = array[j++]; ) {
-                        el.__root__ = true
-                    }
-                    nodes.push(elem)
-                }
-            }
-            for (var i = 0, elem; elem = nodes[i++]; ) {
-                avalon.scan(elem)
-            }
-        } else {
-            avalon.scan(DOC.body)
-        }
+        avalon.scan(DOC.body)
     })
 })(document)
 /**
